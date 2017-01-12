@@ -191,7 +191,7 @@ class CEP2Info:
 			    self.lofarsoft = "/usr/local/"
                         # check if everything is in /usr/local or LOFARSOFT/...
                         if self.lofarsoft == "/usr/local/" or (self.lofarsoft != "/usr/local/" and \
-                                not os.path.exists("%s/release/share/pulsar/data/parfile" % (self.lofarsoft)))
+                                not os.path.exists("%s/release/share/pulsar/data/parfile" % (self.lofarsoft)):
 			    # Directory with existing par-files
         		    self.parfile_dir = "%s/%s/parfiles" % (self.processed_dir_root, self.processed_dir_prefix)
         		    # db file from Psrcat
