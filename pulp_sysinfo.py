@@ -77,6 +77,10 @@ class CEP2Info:
 		#
 		# SLURM related
 		#
+		# extra shell calls for Slurm (not needed for Dragnet though)
+		self.start_shell="/bin/sh -c \""
+		self.end_shell="\""
+		#
 		self.srun_general_opts="--exclusive -n 1"
 		# extra options
 		self.slurm_extra_opts=""
@@ -122,7 +126,7 @@ class CEP2Info:
 			self.summary_nodes={"CS": "locus092", "CV": "locus093", "IS": "locus094"}
 
 		# settings for Dragnet
-                elif self.cluster_headnode[:4] == "drag" or self.cluster_headnode[:3] == "drg":
+		elif self.cluster_headnode[:4] == "drag" or self.cluster_headnode[:3] == "drg":
 			self.ncores = 16 # number of cores in one dragnet node. Can be used to limit a number of simultaneous processes
 			self.lofarsoft = "/usr/local/"
 			# Directory with existing par-files
@@ -146,8 +150,11 @@ class CEP2Info:
 			#
 			# SLURM related
 			#
+			# extra shell calls for Slurm (not needed for Dragnet though)
+			self.start_shell="/bin/sh -c "
+			self.end_shell=""
 			# extra options
-                        self.srun_general_opts="-n 1"
+			self.srun_general_opts="-n 1"
 			#self.slurm_extra_opts="-p proc,workers"
 			self.slurm_extra_opts="-N 1 --mem-per-cpu=8192"
 			# extra options for summary nodes

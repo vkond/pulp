@@ -356,11 +356,11 @@ class Pipeline:
 					docker_cmd_prefix=cep2.docker_cmd_prefix
 					docker_cmd_suffix="%s -e SLURM_JOB_ID=%s -e SLURM_JOB_NAME=%s %s" % \
 						(cep2.docker_common_opts, cep2.slurm_jobid, cep2.slurm_jobname, cmdline.opts.docker_container)
-				cmd="%ssrun %s -c %d --jobid=%s --job-name=%s %s %s /bin/sh -c \"'%spulp.py %s --noinit --local %s --beams %d:%d%s --confdir %s %s'\"" % \
+				cmd="%ssrun %s -c %d --jobid=%s --job-name=%s %s %s %s'%spulp.py %s --noinit --local %s --beams %d:%d%s --confdir %s %s'%s" % \
 					(docker_cmd_prefix, cep2.srun_general_opts, cmdline.opts.nthreads, cep2.slurm_jobid, cep2.slurm_jobname, slurm_extra_opts, \
-					docker_cmd_suffix, use_pulp_switch, cmdline.opts.is_auto and "--id %s" % obs.id or "", \
+					docker_cmd_suffix, cep2.start_shell, use_pulp_switch, cmdline.opts.is_auto and "--id %s" % obs.id or "", \
 					stoki != "" and "--stokes %d" % unit.stokes_index or "", unit.sapid, unit.tabid, tabpart != "" and "/%d" % unit.part or "", \
-					cmdline.opts.confdir, " ".join(cmdline.options))
+					cmdline.opts.confdir, " ".join(cmdline.options), cep2.end_shell)
 				log.info("CMD = %s" % (cmd))
 			else:
 				docker_cmd_suffix=""
@@ -455,10 +455,10 @@ class Pipeline:
 							docker_cmd_prefix=cep2.docker_cmd_prefix
 							docker_cmd_suffix="%s -e SLURM_JOB_ID=%s -e SLURM_JOB_NAME=%s %s" % \
 								(cep2.docker_common_opts, cep2.slurm_jobid, cep2.slurm_jobname, cmdline.opts.docker_container)
-						cmd="%ssrun %s -c %d --jobid=%s --job-name=%s %s %s /bin/sh -c \"'%spulp.py %s --noinit --summary --local --beams %s --confdir %s %s'\"" % \
+						cmd="%ssrun %s -c %d --jobid=%s --job-name=%s %s %s %s'%spulp.py %s --noinit --summary --local --beams %s --confdir %s %s'%s" % \
 							(docker_cmd_prefix, cep2.srun_general_opts, cmdline.opts.nthreads, cep2.slurm_jobid, cep2.slurm_jobname, slurm_summaries_extra_opts, \
-							docker_cmd_suffix, use_pulp_switch, cmdline.opts.is_auto and "--id %s" % (obs.id) or "", \
-							sumcode, cmdline.opts.confdir, " ".join(cmdline.options))
+							docker_cmd_suffix, cep2.start_shell, use_pulp_switch, cmdline.opts.is_auto and "--id %s" % (obs.id) or "", \
+							sumcode, cmdline.opts.confdir, " ".join(cmdline.options), cep2.end_shell)
 					else:
 						docker_cmd_suffix=""
 						if cmdline.opts.is_docker:
