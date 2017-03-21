@@ -1283,11 +1283,17 @@ only for observations that were taken after this date"
 					# Then the pipeline would fail, because list of .h5 files is not empty but not full
 					# We copy first from the processed directories in case some of the .h5 files have zero size (due to problems, no disk space, etc. - I had
 					# this problem before). Then, these .h5 files will be overwritten by the original ones, if they still exist
-					cmd="%s %s 'cp -f -L $(find /*/%s* -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.processed_dir_prefix, self.id, si.get_logdir())
+                                        if si.cluster_headnode[:4] == "drag" or si.cluster_headnode[:3] == "drg":
+                                            cmd="%s %s 'find /*/%s* -name \"%s_SAP*_B*_S*_P*_bf.h5\" -exec cp -f {} %s \;' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.processed_dir_prefix, self.id, si.get_logdir())
+                                        else:
+					    cmd="%s %s 'cp -f -L $(find /*/%s* -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.processed_dir_prefix, self.id, si.get_logdir())
         		                if cmdline.opts.is_debug: log.debug("cmd: %s" % cmd)
                 		        os.system(cmd)
 					# copy .h5 from the original directories
-					cmd="%s %s 'cp -f -L $(find %s*/%s -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, self.id, self.id, si.get_logdir())
+                                        if si.cluster_headnode[:4] == "drag" or si.cluster_headnode[:3] == "drg":
+                                            cmd="%s %s 'find %s*/%s -name \"%s_SAP*_B*_S*_P*_bf.h5\" -exec cp -f {} %s \;' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, self.id, self.id, si.get_logdir())
+                                        else:
+					    cmd="%s %s 'cp -f -L $(find %s*/%s -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, self.id, self.id, si.get_logdir())
 	        	                if cmdline.opts.is_debug: log.debug("cmd: %s" % cmd)
         	        	        os.system(cmd)
 			else: # here we use global FS
