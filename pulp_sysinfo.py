@@ -201,7 +201,8 @@ class CEP2Info:
                         if self.lofarsoft == "/usr/local/" or (self.lofarsoft != "/usr/local/" and \
                                 not os.path.exists("%s/release/share/pulsar/data/parfile" % (self.lofarsoft,))):
 			    # Directory with existing par-files
-        		    self.parfile_dir = "%s/%s/parfiles" % (self.processed_dir_root, self.processed_dir_prefix)
+        		    #self.parfile_dir = "%s/%s/parfiles" % (self.processed_dir_root, self.processed_dir_prefix)
+                            self.parfile_dir = "/data/config/pulp/parfiles"
         		    # db file from Psrcat
 	        	    self.psrcatdb = self.lofarsoft + "bin/psrcat.db"
 		            # Puma2 header file template for bf2puma2
