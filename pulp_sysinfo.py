@@ -188,7 +188,9 @@ class CEP2Info:
 			# cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 			self.cexeccmd="cexec"
 			# summary nodes
-			self.summary_nodes={"CS": "lhd002", "CV": "lhd002", "IS": "lhd002"}
+			self.summary_nodes={"CS": "lhdhead", "CV": "lhdhead", "IS": "lhdhead"}
+			# introduced specifically for CEP4 as the raw data are stored not under rawdir/ObsID
+			self.rawdir_suffix_specificator="*/"
 
 		# settings for CEP4
 		elif self.cluster_headnode[:5] == "head0" or self.cluster_headnode[:3] == "cpu":
@@ -276,7 +278,7 @@ class CEP2Info:
 		try:
 			for l in range(len(cexec_output)):
 				if re.match("^-----", cexec_output[l]) is None:
-					self.alive_nodes.append(cexec_output[l-1].split(" ")[1].split("-")[0])
+					self.alive_nodes.append(cexec_output[l-1].split(" ")[1].split("-")[0].split(".")[0])
 		except Exception:
 			msg="Problem with connection to processing nodes...\nTry removing processing nodes' entries from your ~/.ssh/known_hosts file or try again later"
 			if log != None: log.error(msg)

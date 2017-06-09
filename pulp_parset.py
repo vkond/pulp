@@ -407,7 +407,7 @@ class TABeam:
 		loc=""
 		for l in xrange(len(cexec_output)):
 			if re.match("^-----", cexec_output[l]) is not None:
-				loc=cexec_output[l].split(" ")[1].split("-")[0]
+				loc=cexec_output[l].split(" ")[1].split("-")[0].split(".")[0]
 			else: # it means that we found the file and loc now has the locus node name where processed data are
 			      # but we continue loop, as there can be several locus nodes with processed data for 1 beam if there were several splits
 				self.location.append(loc)
@@ -442,7 +442,7 @@ class TABeam:
 			#log.info("OUTPUT = %s" % (", ".join(cexec_output)))
 			for l in xrange(len(cexec_output)):
 				if re.match("^-----", cexec_output[l]) is not None:
-					loc=cexec_output[l].split(" ")[1].split("-")[0]
+					loc=cexec_output[l].split(" ")[1].split("-")[0].split(".")[0]
 				else:
 					# first we are checking that this file (corresponding raw-file in the /data/ObsId) DO NOT already present
 					# in the current dictionary self.rawfiles. This is to deal with the case when rawdata are in /home area
@@ -554,7 +554,7 @@ class TABeam:
 			for l in xrange(len(cexec_output)):
 				#log.info("l = %d (%d), line = %s" % (l, len(cexec_output), cexec_output[l]))
 				if re.match("^-----", cexec_output[l]) is not None:
-					loc=cexec_output[l].split(" ")[1].split("-")[0]
+					loc=cexec_output[l].split(" ")[1].split("-")[0].split(".")[0]
 				else:
 					# first we are checking that this file (exactly the same with full path) DO NOT already present
 					# in the current dictionary self.rawfiles. This is to deal with the case when rawdata are in /home area
