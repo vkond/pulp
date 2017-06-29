@@ -300,20 +300,40 @@ class PipeUnitPart(PipeUnit):
                         if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and not cmdline.opts.is_nodecode:
 
                                 self.log.info("Copying .h5 file to the current directory...")
-				if (self.tab.is_coherent and obs.stokesCS == "IQUV") or (self.tab.is_coherent == False and obs.stokesIS == "IQUV"):
-					# in this case we get files only for needed Stokes
-					infiles=[ff for ff in self.tab.rawfiles[cep2.current_node] if re.search("_S%d_P%03d_" % (self.stokes_index, self.part), ff)]
-				else: 
-					infiles=[ff for ff in self.tab.rawfiles[cep2.current_node] if re.search("_P%03d_" % self.part, ff)]
+                                if not cmdline.opts.is_globalfs:
+                                        if cep2.current_node in self.tab.rawfiles.keys():
 
-                                for f in infiles:
-                                        # forming the input file string
-					input_file=f  # should be only one file for a part
-                                        # copy *.h5 files
-                                        cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
-					try:
-	                                        self.execute(cmd, workdir=self.curdir)
-					except: pass
+                				if (self.tab.is_coherent and obs.stokesCS == "IQUV") or (self.tab.is_coherent == False and obs.stokesIS == "IQUV"):
+		        		        	# in this case we get files only for needed Stokes
+			                		infiles=[ff for ff in self.tab.rawfiles[cep2.current_node] if re.search("_S%d_P%03d_" % (self.stokes_index, self.part), ff)]
+                				else: 
+		                    			infiles=[ff for ff in self.tab.rawfiles[cep2.current_node] if re.search("_P%03d_" % self.part, ff)]
+
+                                                for f in infiles:
+                                                        # forming the input file string
+				                	input_file=f  # should be only one file for a part
+                                                        # copy *.h5 files
+                                                        cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
+				                	try:
+	                                                        self.execute(cmd, workdir=self.curdir)
+                					except: pass
+                                else: # global FS
+                                        input_files=[]
+                                        for val in self.tab.rawfiles.values(): input_files.extend(val)
+                			if (self.tab.is_coherent and obs.stokesCS == "IQUV") or (self.tab.is_coherent == False and obs.stokesIS == "IQUV"):
+		        		        # in this case we get files only for needed Stokes
+                                                infiles=[ff for ff in input_files if re.search("_S%d_P%03d_" % (self.stokes_index, self.part), ff)]
+                                        else:
+		                    		infiles=[ff for ff in input_files if re.search("_P%03d_" % self.part, ff)]
+
+                                        for f in infiles:
+                                                # forming the input file string
+				               	input_file=f  # should be only one file for a part
+                                                # copy *.h5 files
+                                                cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
+				               	try:
+                                                        self.execute(cmd, workdir=self.curdir)
+                				except: pass
 
                                 self.log.info("Input data: %s" % (input_file))
 
