@@ -425,7 +425,7 @@ class Pipeline:
 				if cmdline.opts.is_slurm:
 					# adding 1 more because the main Pulp process is also run under Slurm
 					#need_only_nnodes=len(self.summary_dirs.items()) + 1
-					need_only_nnodes=1 # maximum we will need 3 job steps (cpus), and original allocation should have 20 tasks per node,
+					need_only_nnodes=2 # maximum we will need 3 job steps (cpus), and original allocation should have 20 tasks per node,
 							   # so we should just fit in 1 node
 					log.info("Shrinking Slurm job %s (%s) allocation to %d node(s) to finish up with summaries..." % (cep2.slurm_jobid, cep2.slurm_jobname, need_only_nnodes))
 					try:
