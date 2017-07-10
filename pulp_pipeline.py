@@ -483,7 +483,6 @@ class Pipeline:
 					finished_units = [p for p in self.sum_popens if p.poll() is not None]
 					for fu in finished_units:
 						if fu.returncode != 0: raise Exception
-						else: self.sum_popens.remove(fu)
 					if len(run_units) > 0: log.info("Still running [%d]: %s" % (len(run_units), run_units))
 
 				# loop over finished summaries to see if they all finished OK
