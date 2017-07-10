@@ -449,7 +449,10 @@ class TABeam:
 					# that is visible from all locus nodes. And also to exclude situation when both raw data and processed data
 					# are present
 					rawfile_exist=False
-					rfile="%s%s/%s/%s%s" % (si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], root.id, si.rawdir_suffix_specificator, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
+					#rfile="%s%s/%s%s/%s%s" % (si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], si.rawdir_prefix_specificator, root.id, si.rawdir_suffix_specificator, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
+                                        rfile_cmd="%s %s 'ls -d %s%s/%s%s/%s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cex     eccmd, cexeclocus, si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], si.rawdir_prefix_specificator, root.id, si.rawdir_suffix_specificator)
+                                        rfile_dir=[line.strip() for line in os.popen(rfile_cmd).readlines()][1]
+                                        rfile="%s%s" % (rfile_dir, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
 					for cloc in self.rawfiles:
 						if rfile in self.rawfiles[cloc]:
 							rawfile_exist=True
@@ -468,7 +471,7 @@ class TABeam:
 					# adding the file if it's not already added
 					if not rawfile_exist:
 						# converting the full filename in the processing location to file name in the /data/ObsId
-						rfile="%s%s/%s/%s%s" % (si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], root.id, si.rawdir_suffix_specificator, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
+						#rfile="%s%s/%s%s/%s%s" % (si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], si.rawdir_prefix_specificator, root.id, si.rawdir_suffix_specificator, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
 						if loc in self.rawfiles: self.rawfiles[loc].append(rfile)
 						else: self.rawfiles[loc]=[rfile]	
 					# excluding this locus node from the list of missing nodes
@@ -489,7 +492,7 @@ class TABeam:
 		if nsplits == 0:
 			if self.is_coherent: nsplits = root.nsplitsCS
 			else: nsplits = root.nsplitsIS
-		cmd="find %s*/%s -name \"%s_SAP%03d_B%03d_S*_bf.raw\"" % (si.rawdir, root.id, root.id, self.parent_sapid, self.tabid)
+		cmd="find %s*/%s%s -name \"%s_SAP%03d_B%03d_S*_bf.raw\"" % (si.rawdir, si.rawdir_prefix_specificator, root.id, root.id, self.parent_sapid, self.tabid)
        	        fileslist=[line.strip() for line in os.popen(cmd).readlines()]
 		avnodes=len(root.nodeslist)
 		for ff in xrange(len(fileslist)):
@@ -547,7 +550,7 @@ class TABeam:
                		if len(nodeslist) > 1:
                        		for s in nodeslist[1:]:
 					cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
-			cmd="%s %s 'find %s*/%s -name \"%s_SAP%03d_B%03d_S*_bf.raw\"' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, self.parent_sapid, self.tabid)
+			cmd="%s %s 'find %s*/%s%s -name \"%s_SAP%03d_B%03d_S*_bf.raw\"' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, si.rawdir_prefix_specificator, root.id, root.id, self.parent_sapid, self.tabid)
        	        	cexec_output=[line.strip() for line in os.popen(cmd).readlines()]
 			#log.info("CMD = %s" % (cmd))
 			#log.info("OUTPUT = %s" % (", ".join(cexec_output)))
@@ -724,7 +727,7 @@ class TABeam:
 			# if tab.location is empty we still have to fill it based on where the processed data are, because Pipeline _needs_ to know
 			# on what nodes to start processing even if it is only for re-doing plots...
 			# So, we try to look for log-file for the particular beam to determine the locus node
-			if len(self.location) == 0 or len(missing_nodes) != 0 or self.numfiles < len(self.assigned_files):
+			if len(self.location) == 0 or self.numfiles < len(self.assigned_files):
 				if not cmdline.opts.is_globalfs:
 					missing_nodes=self.get_processed_data(si, cmdline, root, missing_nodes, log, nsplits)
 			if self.numfiles < len(self.assigned_files):
@@ -1291,13 +1294,13 @@ only for observations that were taken after this date"
                 		        os.system(cmd)
 					# copy .h5 from the original directories
                                         if si.cluster_headnode[:4] == "drag" or si.cluster_headnode[:3] == "drg":
-                                            cmd="%s %s 'find %s*/%s -name \"%s_SAP*_B*_S*_P*_bf.h5\" -exec cp -f {} %s \;' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, self.id, self.id, si.get_logdir())
+                                            cmd="%s %s 'find %s*/%s%s -name \"%s_SAP*_B*_S*_P*_bf.h5\" -exec cp -f {} %s \;' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, si.rawdir_prefix_specificator, self.id, self.id, si.get_logdir())
                                         else:
-					    cmd="%s %s 'cp -f -L $(find %s*/%s -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, self.id, self.id, si.get_logdir())
+					    cmd="%s %s 'cp -f -L $(find %s*/%s%s -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | grep -v information | grep -v missing | grep -v overwrite | egrep -v \'\\-\\-\\-\\-\\-\' | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, si.rawdir_prefix_specificator, self.id, self.id, si.get_logdir())
 	        	                if cmdline.opts.is_debug: log.debug("cmd: %s" % cmd)
         	        	        os.system(cmd)
 			else: # here we use global FS
-				cmd="cp -f -L $(find %s*/%s -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s > /dev/null" % (si.rawdir, self.id, self.id, si.get_logdir())
+				cmd="cp -f -L $(find %s*/%s%s -name \"%s_SAP*_B*_S*_P*_bf.h5\") %s > /dev/null" % (si.rawdir, si.rawdir_prefix_specificator, self.id, self.id, si.get_logdir())
         	                if cmdline.opts.is_debug: log.debug("cmd: %s" % cmd)
        	        	        os.system(cmd)
                 else:

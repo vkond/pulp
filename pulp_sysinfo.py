@@ -59,6 +59,10 @@ class CEP2Info:
 		self.rawdir = "/data"
 		# introduced specifically for CEP4 as the raw data are stored not under rawdir/ObsID
 		self.rawdir_suffix_specificator=""
+                # similar as for suffix. This is most relevant for Dragnet, where raw data can be on both /data1/ and /data2/
+                # and if usage of rawdir is necessary to specify the exact path for a data, then one needs to choose between
+                # /data1 or /data2, and data can be on both
+		self.rawdir_prefix_specificator=""
 		# prefix for default directory with processed data
 		self.processed_dir_prefix="LOFAR_PULSAR_ARCHIVE"
 		self.processed_dir_root = "/data" # in reality it can be /data1/LOFAR_PUL..., /data2/LOFAR_PUL..
@@ -160,6 +164,9 @@ class CEP2Info:
 			# extra options for summary nodes
 			#self.slurm_summaries_extra_opts="-p proc"
 			self.slurm_summaries_extra_opts="-N 1 -w dragproc --mem-per-cpu=8192"
+                        # rawdata specificators
+		        self.rawdir_suffix_specificator="*/"
+		        self.rawdir_prefix_specificator="*/"
 
 		# settings for CEP3
 		elif self.cluster_headnode[:5] == "lhd00":
@@ -179,12 +186,12 @@ class CEP2Info:
 			self.processed_dir_prefix="scratch/vlad/LOFAR_PULSAR_ARCHIVE"
 			# full list of nodes and its cexec corresponding table
 			self.locus_nodes=["lof%03d" % (num+1) for num in range(20)]
-			self.hoover_nodes=["lof020"]   # first is used to process CS data (if files per beam distributed over many nodes), second - to process IS data
-			for num in range(8): # we have 100 locus nodes
+			self.hoover_nodes=[]   # first is used to process CS data (if files per beam distributed over many nodes), second - to process IS data
+			for num in range(20): # we have 100 locus nodes
 				key="lof%03d" % (num+1)
 				self.cexec_nodes[key] = "lof:%d" % (num)
 			# adding hoover nodes as well
-			self.cexec_nodes["lof020"] = "lof:19"
+			#self.cexec_nodes["lof020"] = "lof:19"
 			# cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 			self.cexeccmd="cexec"
 			# summary nodes
@@ -268,7 +275,8 @@ class CEP2Info:
 			for s in self.locus_nodes[1:]:
 				cexeclocus += ",%s" % (self.cexec_nodes[s].split(":")[1])
 		# adding hoover nodes to cexeclocus
-		cexeclocus += " %s" % (self.cexec_nodes[self.hoover_nodes[0]])
+                if len(self.hoover_nodes) > 0:
+		    cexeclocus += " %s" % (self.cexec_nodes[self.hoover_nodes[0]])
 		if len(self.hoover_nodes) > 1:
 			for s in self.hoover_nodes[1:]:
 				cexeclocus += ",%s" % (self.cexec_nodes[s].split(":")[1])

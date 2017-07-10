@@ -371,7 +371,7 @@ class Pipeline:
 					(locus, docker_cmd_suffix, use_pulp_switch, cmdline.opts.is_auto and "--id %s" % obs.id or "", \
 					stoki != "" and "--stokes %d" % unit.stokes_index or "", unit.sapid, unit.tabid, tabpart != "" and "/%d" % unit.part or "", \
 					cmdline.opts.confdir, " ".join(cmdline.options))
-			if cmdline.opts.is_auto:
+			if cmdline.opts.is_auto or cmdline.opts.is_debug:
 				log.info("   Starting processing on locus node: %s..." % (locus))
 				log.info("     CMD: %s" % (cmd))
 			unit.parent = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
