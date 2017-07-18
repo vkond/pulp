@@ -25,6 +25,7 @@ class CEP2Info:
                     print "Env. variable 'HOME' is not defined!"                    
                     raise
                 self.lofarsoft = ""
+                self.lofarsoft_bin = ""
 		# Additional possible directory with parfiles
 		self.parfile_dir_extra = "/home/kondratiev/parfiles"
 		# maximum radial distance (in deg) to find pulsars in FOV
@@ -105,6 +106,7 @@ class CEP2Info:
 			self.ncores = 24 # number of cores in one locus nodes. Can be used to limit a number of simultaneous processes
                         try:
 			    self.lofarsoft = os.environ['LOFARSOFT']
+			    self.lofarsoft_bin = "%s/release/share/pulsar/bin" % (self.lofarsoft)
                         except:
                             print "Env. variable 'LOFARSOFT' is not defined!"
                             raise
@@ -133,6 +135,7 @@ class CEP2Info:
 		elif self.cluster_headnode[:4] == "drag" or self.cluster_headnode[:3] == "drg":
 			self.ncores = 16 # number of cores in one dragnet node. Can be used to limit a number of simultaneous processes
 			self.lofarsoft = "/usr/local/"
+			self.lofarsoft_bin = self.lofarsoft + "bin"
 			# Directory with existing par-files
 			self.parfile_dir = self.lofarsoft + "etc/parfiles"
 			# db file from Psrcat
@@ -173,6 +176,7 @@ class CEP2Info:
 			self.ncores = 40 # number of cores in one CEP3 node. Can be used to limit a number of simultaneous processes
                         try:
 			    self.lofarsoft = os.environ['LOFARSOFT']
+			    self.lofarsoft_bin = "%s/release/share/pulsar/bin" % (self.lofarsoft)
                         except:
                             print "Env. variable 'LOFARSOFT' is not defined!"
                             raise
@@ -204,8 +208,10 @@ class CEP2Info:
 			self.ncores = 20 # number of cores in one CEP4 node. Can be used to limit a number of simultaneous processes
                         try:
 			    self.lofarsoft = os.environ['LOFARSOFT']
+			    self.lofarsoft_bin = "%s/release/share/pulsar/bin" % (self.lofarsoft)
                         except:
 			    self.lofarsoft = "/usr/local/"
+                            self.lofarsoft_bin = self.lofarsoft + "bin"
                         # check if everything is in /usr/local or LOFARSOFT/...
                         if self.lofarsoft == "/usr/local/" or (self.lofarsoft != "/usr/local/" and \
                                 not os.path.exists("%s/release/share/pulsar/data/parfile" % (self.lofarsoft,))):

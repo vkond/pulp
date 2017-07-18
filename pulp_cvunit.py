@@ -145,7 +145,7 @@ class CVUnit(PipeUnit):
 					verbose=""
 					if cmdline.opts.is_debug: verbose="-v"
 					self.log.info("Converting raw 32-bit data to 8 bits...")
-					cmd="python %s/release/share/pulsar/bin/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, " ".join(["%s/%s" % (self.curdir, ff.replace(".raw", ".h5")) for ff in input_files]))
+					cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, " ".join(["%s/%s" % (self.curdir, ff.replace(".raw", ".h5")) for ff in input_files]))
 					self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
 
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have

@@ -174,7 +174,7 @@ class PipeUnitPart(PipeUnit):
                                         verbose=""
                                         if cmdline.opts.is_debug: verbose="-v"
                                         self.log.info("Converting raw 32-bit data to 8 bits...")
-                                        cmd="python %s/release/share/pulsar/bin/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, " ".join(["%s/%s" % (self.curdir, ff) for ff in input_files])) 
+                                        cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, " ".join(["%s/%s" % (self.curdir, ff) for ff in input_files])) 
                                         self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
 
                                 if not cmdline.opts.is_nodecode:
@@ -369,7 +369,7 @@ class PipeUnitPart(PipeUnit):
                                         verbose=""
                                         if cmdline.opts.is_debug: verbose="-v"
                                         self.log.info("Converting raw 32-bit data to 8 bits...")
-                                        cmd="python %s/release/share/pulsar/bin/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, input_file.replace(".raw", ".h5"))
+                                        cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, input_file.replace(".raw", ".h5"))
                                         self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
 
                                 # running data conversion (2bf2fits)
@@ -412,7 +412,7 @@ self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
                                         if not cmdline.opts.is_skip_subdyn:
                                                 self.log.info("Producing RFI report...")
                                                 samples_to_average=int((cmdline.opts.subdyn_time_average * 1000.)/ self.sampling)
-                                                cmd="python %s/release/share/pulsar/bin/subdyn.py --psrfits --saveonly -n %d --title \"%s %s Averaging: %g s \" %s.fits" % (cep2.lofarsoft, samples_to_average, obs.id, self.procdir, cmdline.opts.subdyn_time_average, self.output_prefix)
+                                                cmd="python %s/subdyn.py --psrfits --saveonly -n %d --title \"%s %s Averaging: %g s \" %s.fits" % (cep2.lofarsoft_bin, samples_to_average, obs.id, self.procdir, cmdline.opts.subdyn_time_average, self.output_prefix)
                                                 subdyn_popen = self.start_and_go(cmd, workdir=self.curdir)
 
                                         # waiting for rfifind to finish
