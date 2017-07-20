@@ -209,6 +209,9 @@ class CEP2Info:
                         try:
 			    self.lofarsoft = os.environ['LOFARSOFT']
 			    self.lofarsoft_bin = "%s/release/share/pulsar/bin" % (self.lofarsoft)
+                            if not os.path.exists(self.lofarsoft_bin):
+                                self.lofarsoft = "/usr/local/"
+                                self.lofarsoft_bin = self.lofarsoft + "bin"
                         except:
 			    self.lofarsoft = "/usr/local/"
                             self.lofarsoft_bin = self.lofarsoft + "bin"
