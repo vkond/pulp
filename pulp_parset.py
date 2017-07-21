@@ -450,7 +450,7 @@ class TABeam:
 					# are present
 					rawfile_exist=False
 					#rfile="%s%s/%s%s/%s%s" % (si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], si.rawdir_prefix_specificator, root.id, si.rawdir_suffix_specificator, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
-                                        rfile_cmd="%s %s 'ls -d %s%s/%s%s/%s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cex     eccmd, cexeclocus, si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], si.rawdir_prefix_specificator, root.id, si.rawdir_suffix_specificator)
+                                        rfile_cmd="%s %s 'ls -d %s%s/%s%s/%s' | grep -v denied | grep -v such | grep -v match | grep -v xauth | grep -v connect | grep -v closed | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, cexec_output[l].split(si.rawdir)[-1].split("/")[0], si.rawdir_prefix_specificator, root.id, si.rawdir_suffix_specificator)
                                         rfile_dir=[line.strip() for line in os.popen(rfile_cmd).readlines()][1]
                                         rfile="%s%s" % (rfile_dir, cexec_output[l].replace(".h5", ".raw").split("/")[-1])
 					for cloc in self.rawfiles:
