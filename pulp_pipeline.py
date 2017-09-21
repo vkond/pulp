@@ -1096,7 +1096,7 @@ class Pipeline:
 							if cmdline.psrs[0] == "tabfind+":
 								if sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None): psrs = [sap.source]
 								else: psrs = []
-								if len(sap.psrs) > 0: psrs += sap.psrs
+								if len(sap.psrs) > 0: psrs += list(sap.psrs)
 								psrs = list(np.unique(psrs))
 					if sap.nrRings > 0: self.log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
 					else: self.log.info("Creating TA heatmap with %d TA beams for SAP=%d..." % (nrTABs, sap.sapid))
@@ -1536,7 +1536,7 @@ class Pipeline:
 							if cmdline.psrs[0] == "tabfind+":
 								if sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None): psrs = [sap.source]
 								else: psrs = []
-								if len(sap.psrs) > 0: psrs += sap.psrs
+								if len(sap.psrs) > 0: psrs += list(sap.psrs)
 								psrs = list(np.unique(psrs))
 					if sap.nrRings > 0: self.log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
 					else: self.log.info("Creating TA heatmap with %d TA beams for SAP=%d..." % (nrTABs, sap.sapid))
