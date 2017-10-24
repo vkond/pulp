@@ -67,17 +67,17 @@ def dspsr_postproc(root, ref, cmdline, obs, psr, total_chan, nsubs_eff, curdir, 
 	# dedispersing
         # checking if there was already an option -K. That means we do not need to run dedispersion as all sub-integrations
         # have been aligned already
-        if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("\s+\-K$", cmdline.opts.dspsr_extra_opts) or \
-            re.match("\s+\-K\s+", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+", cmdline.opts.dspsr_extra_opts): \
-                cmd="mv %s_%s.ar %s_%s.dd" % (psr, output_prefix, psr, output_prefix)
+	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("\s+\-K$", cmdline.opts.dspsr_extra_opts) or \
+                re.match("\s+\-K\s+", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+", cmdline.opts.dspsr_extra_opts): \
+		cmd="mv %s_%s.ar %s_%s.dd" % (psr, output_prefix, psr, output_prefix)
                 root.execute(cmd, workdir=curdir)
         else:
-	        root.log.info("Dedispersing...")
-                if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
-		        cmd="pam -D -m %s_%s.paz.ar" % (psr, output_prefix)
-		        root.execute(cmd, workdir=curdir)
-	        cmd="pam -D -e dd %s_%s.ar" % (psr, output_prefix)
-	        root.execute(cmd, workdir=curdir)
+		root.log.info("Dedispersing...")
+		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
+			cmd="pam -D -m %s_%s.paz.ar" % (psr, output_prefix)
+			root.execute(cmd, workdir=curdir)
+		cmd="pam -D -e dd %s_%s.ar" % (psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
 
 	# scrunching in frequency
 	root.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (nsubs_eff))
