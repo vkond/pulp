@@ -190,8 +190,8 @@ class PipeUnitPart(PipeUnit):
                                                 dspsr_nbins=self.get_best_nbins("%s/%s.par" % (tmpdir, psr2))
 						if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_dspsr:
 	                                                self.log.info("Running dspsr for pulsar %s..." % (psr))
-        	                                        cmd="dspsr -b %d -A -L %d %s -E %s/%s.par -O %s_%s -t %d %s %s" % \
-								(dspsr_nbins, cmdline.opts.tsubint, verbose, tmpdir, psr2, psr, self.output_prefix, \
+        	                                        cmd="dspsr -b %d -A %s %s -E %s/%s.par -O %s_%s -t %d %s %s" % \
+								(dspsr_nbins, self.dspsr_folding_options, verbose, tmpdir, psr2, psr, self.output_prefix, \
 								cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, s0_file)
                                 	                self.execute(cmd, workdir=self.curdir)
 						# run digifil with coherent dedispersion for further single-pulse analysis
@@ -432,8 +432,8 @@ self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
                                                 for psr in self.psrs: # pulsar list is empty if --nofold is used
                                                         psr2=re.sub(r'^[BJ]', '', psr)
                                                         dspsr_nbins=self.get_best_nbins("%s/%s.par" % (tmpdir, psr2))
-                                                        cmd="dspsr -b %d -A -L %d -E %s/%s.par %s -O %s_%s -t %d %s %s.fits" % \
-                                                                (dspsr_nbins, cmdline.opts.tsubint, tmpdir, psr2, verbose, psr, \
+                                                        cmd="dspsr -b %d -A %s -E %s/%s.par %s -O %s_%s -t %d %s %s.fits" % \
+                                                                (dspsr_nbins, self.dspsr_folding_options, tmpdir, psr2, verbose, psr, \
                                                                 self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
                                                         dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
                                                         dspsr_popens.append(dspsr_popen)

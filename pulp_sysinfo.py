@@ -95,6 +95,8 @@ class CEP2Info:
 		self.slurm_jobid=""
 		# job name
 		self.slurm_jobname="Pulp"
+                # number of nodes needed for summaries (default is 2)
+                self.slurm_number_summary_nodes=2
 		#
 		# DOCKER related
 		#
@@ -167,6 +169,8 @@ class CEP2Info:
 			# extra options for summary nodes
 			#self.slurm_summaries_extra_opts="-p proc"
 			self.slurm_summaries_extra_opts="-N 1 -w dragproc --mem-per-cpu=8192"
+                        # number of nodes needed for summaries (default is 2)
+                        self.slurm_number_summary_nodes=1
                         # rawdata specificators
 		        self.rawdir_suffix_specificator="*/"
 		        self.rawdir_prefix_specificator="*/"

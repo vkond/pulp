@@ -196,8 +196,8 @@ class CVUnitPart(PipeUnitPart, CVUnit):
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -m %s -b %d -A -L %d %s -E %s/%s.par -O %s_%s_SB%s -t %d %s %s" % \
-									(obsmjd, dspsr_nbins, cmdline.opts.tsubint, verbose, tmpdir, psr2, psr, self.output_prefix, \
+								cmd="dspsr -m %s -b %d -A %s %s -E %s/%s.par -O %s_%s_SB%s -t %d %s %s" % \
+									(obsmjd, dspsr_nbins, self.dspsr_folding_options, verbose, tmpdir, psr2, psr, self.output_prefix, \
 										input_file.split("_SB")[1], cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 								dspsr_popens.append(dspsr_popen)
