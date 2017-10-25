@@ -67,8 +67,8 @@ def dspsr_postproc(root, ref, cmdline, obs, psr, total_chan, nsubs_eff, curdir, 
 	# dedispersing
         # checking if there was already an option -K. That means we do not need to run dedispersion as all sub-integrations
         # have been aligned already
-	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("\s+\-K$", cmdline.opts.dspsr_extra_opts) or \
-                    re.match("\s+\-K\s+", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+", cmdline.opts.dspsr_extra_opts):
+	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-K$", cmdline.opts.dspsr_extra_opts) or \
+                    re.match("^.*\s+\-K\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+.*$", cmdline.opts.dspsr_extra_opts):
 		cmd="mv %s_%s.ar %s_%s.dd" % (psr, output_prefix, psr, output_prefix)
                 root.execute(cmd, workdir=curdir)
         else:
@@ -317,8 +317,8 @@ class PipeUnit:
                 # making choice between -L %d   and "-s"
                 # by default -L is used, but if -s is given in the dspsr_extra_opts, then we should get rid of -L
                 self.dspsr_folding_options="-L %d" % (cmdline.opts.tsubint)
-                if re.match("^\-s$", cmdline.opts.dspsr_extra_opts) or re.match("\s+\-s$", cmdline.opts.dspsr_extra_opts) or \
-                   re.match("\s+\-s\s+", cmdline.opts.dspsr_extra_opts) or re.match("^\-s\s+", cmdline.opts.dspsr_extra_opts): \
+                if re.match("^\-s$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-s$", cmdline.opts.dspsr_extra_opts) or \
+                   re.match("^.*\s+\-s\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-s\s+.*$", cmdline.opts.dspsr_extra_opts):
                         self.dspsr_folding_options=""
 
 	# function to set outdir and curdir directories
