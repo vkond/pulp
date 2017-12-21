@@ -563,12 +563,20 @@ class PipeUnit:
 		tmpdir = tempfile.mkdtemp()
 
 		# Now we check the par-files if they have non-appropriate flags that can cause prepfold to crash
+                toremove_psrs=[] # list of pulsars to remove from folding in case there is a problem with the parfile (e.g. PEPOCH is absent)
 		for psr in self.psrs:
 			psr2=re.sub(r'^[BJ]', '', psr)
 			parfile="%s/%s.par" % (self.outdir, psr2)
 			cmd="rsync -a %s %s" % (parfile, tmpdir)
 			self.execute(cmd)
 			parf="%s/%s" % (tmpdir, parfile.split("/")[-1])
+                        # check first that PEPOCH is in the parfile
+                        cmd="grep 'PEPOCH' %s" % (parf,)
+                	status=os.popen(cmd).readlines()
+			if np.size(status)>0:
+                                self.log.warning("WARNING: Par-file %s has no PEPOCH keyword, so this pulsar will be excluded from folding." % (parfile,))
+                                toremove_psrs.append(psr)
+                                continue
 			# check first for PSRB name. It should be changed to PSRJ
 			cmd="grep 'PSRB' %s" % (parf,)
                 	status=os.popen(cmd).readlines()
@@ -595,9 +603,16 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				self.execute(cmd, self.log, is_os=True)
 				cmd="rsync -a %s %s" % (parf, self.outdir)
 				self.execute(cmd)
+                # removing pulsars from folding if their parfile is bad (e.g. no PEPOCH)
+                if len(toremove_psrs) > 0:
+                        indices_to_remove=set()
+                        for psr in np.unique(toremove_psrs):
+                                for ii in xrange(len(self.psrs)):
+                                        if psr == self.psrs[ii]: indices_to_remove.add(ii) 
+                        indices_to_remove = sorted(indices_to_remove, reverse=True)
+                        for ind in indices_to_remove: del(self.psrs[ind])
 		# return tmpdir
 		return tmpdir
-
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
 	    	"""
