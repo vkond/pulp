@@ -609,8 +609,8 @@ UNITS line will be removed from the parfile!" % (parfile,))
                         for psr in np.unique(toremove_psrs):
                                 for ii in xrange(len(self.psrs)):
                                         if psr == self.psrs[ii]: indices_to_remove.add(ii) 
-                        indices_to_remove = sorted(indices_to_remove, reverse=True)
-                        for ind in indices_to_remove: del(self.psrs[ind])
+                        indices_to_keep=sorted(set(np.arange(len(self.psrs)))-indices_to_remove)
+                        self.psrs = self.psrs[indices_to_keep]
 		# return tmpdir
 		return tmpdir
 
