@@ -573,7 +573,7 @@ class PipeUnit:
                         # check first that PEPOCH is in the parfile
                         cmd="grep 'PEPOCH' %s" % (parf,)
                 	status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			if np.size(status)==0:
                                 self.log.warning("WARNING: Par-file %s has no PEPOCH keyword, so this pulsar will be excluded from folding." % (parfile,))
                                 toremove_psrs.append(psr)
                                 continue
