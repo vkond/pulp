@@ -106,8 +106,6 @@ for PRESTO part only, and for CV data using digifil approach", default=False)
                            help="running prepsubband for a range of DMs (default - 1000 DM trials +/-5 around nominal DM of the pulsar) and prepdata for DM=0 \
 followed by single_pulse_search.py. Prepsubband is run using -nsub option with the highest possible value of subbands, the highest common denominator of the number \
 of channels that is <=1024. Use --prepsubband-extra-opts to set different DM range/step and/or nsub", default=False)
-        	self.cmd.add_option('--rrats-dm-range', dest='rrats_dm_range', metavar='FLOAT',
-                           help="RRATs DM range, i.e. by how much the lowest DM value in the prepsubband is from the nominal DM of a RRAT. Default: %default", default=5.0, type='float')
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
 TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -297,8 +295,6 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 			# CS/IS parameters
 			self.opts.is_rrats = wrapper.pulsar_parms.getBool("rrats")
 			if self.opts.is_rrats: self.options.append("--rrats")
-			self.opts.rrats_dm_range = wrapper.pulsar_parms.getFloat("rrats_dm_range")
-			if self.opts.rrats_dm_range != 5.0: self.options.extend(["--rrats-dm-range", "%f" % self.opts.rrats_dm_range])
 			self.opts.bf2fits_extra_opts = wrapper.pulsar_parms.getString("2bf2fits_extra_opts")
 			if self.opts.bf2fits_extra_opts != "": self.options.extend(["--2bf2fits-extra-opts", "%s" % self.opts.bf2fits_extra_opts])
 			self.opts.decode_sigma = wrapper.pulsar_parms.getInt("decode_sigma")

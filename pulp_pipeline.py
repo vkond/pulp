@@ -1441,15 +1441,17 @@ class Pipeline:
 					if is_iquv:
 						stokes = bigfile.split("%s_S" % (curprocdir))[-1].split("_")[0]
 
-                                	# calculating the peak S/N from the bestprof file
-	                                snr=0.0
-        	                        try:
-                	                        prof = np.loadtxt(bp, comments='#', usecols=(1,1), dtype=float, unpack=True)[0]
-                        	                rms=np.std(np.sort(prof)[0:int(np.size(prof)/2.)])
-                                	        mean=np.mean(np.sort(prof)[0:int(np.size(prof)/2.)])
-                                        	snr=(np.max(prof)-mean)/rms
-	                                except:
-                	                        self.log.warning("Warning: can't read file %s or calculate peak S/N of the profile" % (bp))
+                                	# calculating the S/N (profile significance) from the bestprof file
+                                        snr=0.0
+                                        try:
+                                                locdir="/".join(bp.split("/")[0:-1])
+                                                if not os.path.exists("%s/snr.log" % (locdir)):
+                                                        cmd="snr.py --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)
+                                                        self.execute(cmd, workdir=locdir, is_os=True)
+                                                tmp = np.genfromtxt("%s/snr.log" % (locdir), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+                                                snr = float(tmp[0])
+                                        except:
+                	                        self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
 
 					# getting the part number if there are many splits
 					curpart=""

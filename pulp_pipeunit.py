@@ -836,10 +836,7 @@ UNITS line will be removed from the parfile!" % (parfile,))
 	# running prepfold(s) for all specified pulsars
 	# returning the Popen instances of prepfold calls
 	def start_prepfold(self, cmdline, total_chan):
-		if total_chan >= 256 and total_chan <= 6000:
-#			prepfold_nsubs = 256
-			prepfold_nsubs = 512
-		elif total_chan > 6000:
+                if total_chan >= 256:
 			prepfold_nsubs = 512
 		else: prepfold_nsubs = total_chan
 #		prepfold_nsubs = total_chan
@@ -950,16 +947,17 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				except: continue
 				curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
 				thumbs.append(thumbfile)
-				# calculating the peak S/N from the bestprof file
+				# calculating the S/N (profile significance) from the bestprof file
 				snr=0.0
 				try:
-	                		prof = np.loadtxt(bp, comments='#', usecols=(1,1), dtype=float, unpack=True)[0]
-					rms=np.std(np.sort(prof)[0:int(np.size(prof)/2.)])
-					mean=np.mean(np.sort(prof)[0:int(np.size(prof)/2.)])
-					snr=(np.max(prof)-mean)/rms
+                                        if not os.path.exists("%s/snr.log" % (self.curdir)):
+                                                cmd="snr.py --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)    
+                                                self.execute(cmd, workdir=self.curdir, is_os=True)
+                                        tmp = np.genfromtxt("%s/snr.log" % (self.curdir), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+                                        snr = float(tmp[0])
 				except:
 					if self.sapid == cursapid and self.procdir == curprocdir:
-						self.log.warning("Warning: can't read file %s or calculate peak S/N of the profile" % (bp))
+						self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
 
 				chif.write("file=%s obs=%s_SAP%d_%s_%s S/N=%g%s\n" % (thumbfile, self.code, cursapid, curprocdir, psr, snr, rfifrac != "" and " RFI=%s" % (rfifrac) or ""))
 				montage_cmd += "-label '%s SAP%d %s\n%s\nS/N = %g' %s " % (self.code, cursapid, curprocdir, psr, snr, thumbfile)
@@ -1017,7 +1015,24 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
 			dmstep=0.01
 			numdms=1000 # 1000 is the maximum
-			lodm=psrdm-cmdline.opts.rrats_dm_range # we want to cover +-5 in DM with 0.01 steps (by default), i.e. ~1000 DM trials
+                        # parsing prepsubband extra options for 'numdms', if there are no such option we will use default numdms=1000, if there
+                        # are several, we will use only the last one
+                        pattern = "\-numdms\s+(\d+)"
+                        numdms_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
+                        if len(numdms_list) != 0: numdms = int(numdms_list[-1])
+                        # parsing prepsubband extra options for 'dmstep', if there are no such option we will use default dmstep=0.01, if there
+                        # are several, we will use only the last one
+                        pattern = "\-dmstep\s+([\d\.]+)"
+                        dmstep_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
+                        if len(dmstep_list) != 0: dmstep = float(dmstep_list[-1])
+                        # parsing prepsubband extra options for 'lodm', if there are no such option we will calculate it as lodm=psrdm-0.5*dmstep*numdms
+                        # if there are several, we will only use the last one
+                        pattern = "\-lodm\s+([\d\.]+)"
+                        lodm_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
+                        if len(lodm_list) != 0: 
+                                lodm = float(lodm_list[-1])
+                        else:
+			        lodm = psrdm - 0.5*dmstep*numdms # we want to cover +-5 in DM with 0.01 steps (by default), i.e. ~1000 DM trials
 			if lodm <= 0.0: lodm = 0.01 # because we will do DM=0 with prepdata anyway
 			# running prepdata for DM=0 with mask (if --norfi was not set)
 			if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
