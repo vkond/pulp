@@ -1446,7 +1446,7 @@ class Pipeline:
                                         try:
                                                 locdir="/".join(bp.split("/")[0:-1])
                                                 if not os.path.exists("%s/snr.log" % (locdir)):
-                                                        cmd="snr.py --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)
+                                                        cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)
                                                         self.execute(cmd, workdir=locdir, is_os=True)
                                                 tmp = np.genfromtxt("%s/snr.log" % (locdir), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
                                                 snr = float(tmp[0])

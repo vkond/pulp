@@ -951,7 +951,7 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				snr=0.0
 				try:
                                         if not os.path.exists("%s/snr.log" % (self.curdir)):
-                                                cmd="snr.py --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)    
+                                                cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)    
                                                 self.execute(cmd, workdir=self.curdir, is_os=True)
                                         tmp = np.genfromtxt("%s/snr.log" % (self.curdir), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
                                         snr = float(tmp[0])
