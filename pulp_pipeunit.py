@@ -950,10 +950,11 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				# calculating the S/N (profile significance) from the bestprof file
 				snr=0.0
 				try:
-                                        if not os.path.exists("%s/snr.log" % (self.curdir)):
-                                                cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)    
+                                        snrlog="snr-presto.log"
+                                        if not os.path.exists("%s/%s" % (self.curdir, snrlog)):
+                                                cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s" % (bp, snrlog)    
                                                 self.execute(cmd, workdir=self.curdir, is_os=True)
-                                        tmp = np.genfromtxt("%s/snr.log" % (self.curdir), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+                                        tmp = np.genfromtxt("%s/%s" % (self.curdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
                                         snr = float(tmp[0])
 				except:
 					if self.sapid == cursapid and self.procdir == curprocdir:

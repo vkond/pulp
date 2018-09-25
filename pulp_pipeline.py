@@ -1445,10 +1445,11 @@ class Pipeline:
                                         snr=0.0
                                         try:
                                                 locdir="/".join(bp.split("/")[0:-1])
-                                                if not os.path.exists("%s/snr.log" % (locdir)):
-                                                        cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee snr.log" % (bp)
+                                                snrlog="snr-presto.log"
+                                                if not os.path.exists("%s/%s" % (locdir, snrlog)):
+                                                        cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s" % (bp, snrlog)
                                                         self.execute(cmd, workdir=locdir, is_os=True)
-                                                tmp = np.genfromtxt("%s/snr.log" % (locdir), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+                                                tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
                                                 snr = float(tmp[0])
                                         except:
                 	                        self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
