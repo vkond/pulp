@@ -952,7 +952,7 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				try:
                                         snrlog="snr-presto.log"
                                         if not os.path.exists("%s/%s" % (self.curdir, snrlog)):
-                                                cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s" % (bp, snrlog)    
+                                                cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, self.curdir, snrlog)    
                                                 self.execute(cmd, workdir=self.curdir, is_os=True)
                                         tmp = np.genfromtxt("%s/%s" % (self.curdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
                                         snr = float(tmp[0])

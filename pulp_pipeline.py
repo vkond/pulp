@@ -1447,7 +1447,7 @@ class Pipeline:
                                                 locdir="/".join(bp.split("/")[0:-1])
                                                 snrlog="snr-presto.log"
                                                 if not os.path.exists("%s/%s" % (locdir, snrlog)):
-                                                        cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s" % (bp, snrlog)
+                                                        cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, locdir, snrlog)
                                                         self.execute(cmd, workdir=locdir, is_os=True)
                                                 tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
                                                 snr = float(tmp[0])
