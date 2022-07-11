@@ -1122,10 +1122,10 @@ UNITS line will be removed from the parfile!" % (parfile,))
 		def is_file_ok_for_the_tarball(tf, part):
 			tfbase=tf.split("/")[-1]
 			if "_part" in tfbase:
-				if "_part%d" % (self.part) in tfbase: return True
+				if "_part%d." % (self.part) in tfbase: return True
 				else: return False
 			if "_PART" in tfbase:
-				if "_PART%d" % (self.part) in tfbase: return True
+				if "_PART%d." % (self.part) in tfbase: return True
 				else: return False
 			if "_PL" in tfbase:
 				for bl in tfbase.split("_PL"):
