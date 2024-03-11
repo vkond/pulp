@@ -950,7 +950,9 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				# calculating the S/N (profile significance) from the bestprof file
 				snr=0.0
 				try:
-                                        snrlog="snr-presto.log"
+                                        import tempfile
+                                        snrtmpdir = tempfile.mkdtemp()
+                                        snrlog="%s/snr-presto.log" % (snrtmpdir)
                                         if not os.path.exists("%s/%s" % (self.curdir, snrlog)):
                                                 cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, self.curdir, snrlog)    
                                                 self.execute(cmd, workdir=self.curdir, is_os=True)
@@ -966,9 +968,13 @@ UNITS line will be removed from the parfile!" % (parfile,))
 			chif.close()
 			cmd="mv %s_sap%03d_tab%04d_stokes%d_part%03d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid, self.stokes_index, self.part)
 			self.execute(cmd, workdir=self.outdir)
+            cmd="cp %s/%s %s" % (self.curdir, snrlog, self.curdir)
+            self.execute(cmd, workdir=self.outdir)
+            cmd="rm -rf %s" % (snrtmpdir)
+            os.system(cmd)
 
 			# creating combined plots
-			# only creating combined plots when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
+			# only creating combined plo % (snrtmpdir)ts when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
 			# the same node, that bestprof files do exist, but thumbnails were not created yet at the time when chi-squared.txt is
 			# getting created for another beam. And this will cause "montage" command to fail
 			# At the end combined plot will eventually be created for this node during the procesing of the last beam of this node
