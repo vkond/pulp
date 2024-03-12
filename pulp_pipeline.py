@@ -574,7 +574,7 @@ class Pipeline:
 			self.log.info(sout)
 			job_end = time.time()
 			job_total_time = job_end - job_start
-			self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Waiting time: %.1f s (%.2f hrs)" % \	(popen.pid, prg, time.asctime(time.gmtime()), popen.returncode, job_total_time, job_total_time/3600.))
+			self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Waiting time: %.1f s (%.2f hrs)" % (popen.pid, prg, time.asctime(time.gmtime()), popen.returncode, job_total_time, job_total_time/3600.))
 			self.log.info("")
 			# if job is not successful
 			if popen.poll() != 0:
@@ -604,7 +604,7 @@ class Pipeline:
 					self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
 				job_end = time.time()
 				job_total_time = job_end - job_start
-				self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % \ (prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
+				self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % (prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
 				self.log.info("")
 		except Exception:
 			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join(["%d" % (fu.pid) for fu in popen_list if fu.poll() is not None])))
