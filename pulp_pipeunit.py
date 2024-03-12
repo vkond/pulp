@@ -20,26 +20,25 @@ from pulp_feedback import FeedbackUnit
 
 # return list of dirs in the current base directory
 def getDirs(base):
-        return [x for x in glob.iglob(os.path.join(base, '*')) if os.path.isdir(x)]
+	return [x for x in glob.iglob(os.path.join(base, '*')) if os.path.isdir(x)]
 
 # recursive glob
 def rglob(base, pattern, maxdepth=0):
-        flist=[]
-        flist.extend(glob.glob(os.path.join(base, pattern)))
-        dirs = getDirs(base)
-        if maxdepth <= 0: return flist
-        if len(dirs):
-                for d in dirs:
-                        flist.extend(rglob(os.path.join(base, d), pattern, maxdepth-1))
-        return flist
+	flist=[]
+	flist.extend(glob.glob(os.path.join(base, pattern)))
+	dirs = getDirs(base)
+	if maxdepth <= 0: return flist
+	if len(dirs):
+		for d in dirs:
+			flist.extend(rglob(os.path.join(base, d), pattern, maxdepth-1))
+	return flist
 
 # common postprocessing routines after DSPSR calls for different Units and both DAL and non_DAL parts
 # root - class instance to execute
 # ref - class instance to get values of chans, etc.
 def dspsr_postproc(root, ref, cmdline, obs, psr, total_chan, nsubs_eff, curdir, output_prefix):
-
 	# removing corrupted freq channels
-        if ref.nrChanPerSub > 1:
+	if ref.nrChanPerSub > 1:
 		root.log.info("Zapping every %d channel..." % (ref.nrChanPerSub))
 		cmd="paz -z \"%s\" -m %s_%s.ar" % \
 			(" ".join([str(jj) for jj in range(0, total_chan, ref.nrChanPerSub)]), psr, output_prefix)
@@ -65,13 +64,12 @@ def dspsr_postproc(root, ref, cmdline, obs, psr, total_chan, nsubs_eff, curdir, 
 				root.execute(cmd, workdir=curdir)
 
 	# dedispersing
-        # checking if there was already an option -K. That means we do not need to run dedispersion as all sub-integrations
-        # have been aligned already
-	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-K$", cmdline.opts.dspsr_extra_opts) or \
-                    re.match("^.*\s+\-K\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+.*$", cmdline.opts.dspsr_extra_opts):
+	# checking if there was already an option -K. That means we do not need to run dedispersion as all sub-integrations
+	# have been aligned already
+	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-K$", cmdline.opts.dspsr_extra_opts) or \ re.match("^.*\s+\-K\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+.*$", cmdline.opts.dspsr_extra_opts):
 		cmd="mv %s_%s.ar %s_%s.dd" % (psr, output_prefix, psr, output_prefix)
-                root.execute(cmd, workdir=curdir)
-        else:
+		root.execute(cmd, workdir=curdir)
+	else:
 		root.log.info("Dedispersing...")
 		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
 			cmd="pam -D -m %s_%s.paz.ar" % (psr, output_prefix)
@@ -197,9 +195,9 @@ def finish_pdmp(root, ref, pdmp_popens, cmdline, obs, curdir, output_prefix):
 		cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, curdir, curdir, psr, output_prefix)
 		root.execute(cmd, is_os=True)
 		# getting new topo period
-                logf = open(root.log.get_logfile(), 'r')
-                newp0s = [str(float(ff.split()[5])/1000.) for ff in logf.read().splitlines() if re.search("^Best TC", ff) is not None]
-                logf.close()
+		logf = open(root.log.get_logfile(), 'r')
+		newp0s = [str(float(ff.split()[5])/1000.) for ff in logf.read().splitlines() if re.search("^Best TC", ff) is not None]
+		logf.close()
 		if np.size(newp0s) > 1: newp0 = newp0s[-1]
 		else: newp0 = newp0s[0]
 		# reading new DM from the *.per file
@@ -274,8 +272,8 @@ class PipeUnit:
 		self.tab = tab
 		self.parent = None   # parent Popen project
 		self.procs = []      # list of open processes
-				     # process.pid - pid, process.returncode - status
-                                     # if returncode == None, it means that process is still running
+		# process.pid - pid, process.returncode - status
+		# if returncode == None, it means that process is still running
 		self.rawdir = ""     # actual rawdir for this beam (where the processing is happening, e.g. either /data1 or /data2)
 		self.processed_dir_root = ""  # root directory relative to cep2.processed_dir_prefix, i.e. where LOFAR_PULSAR_ARCHIVE resides
 					      # because it can be different from cep2.rawdir  
@@ -313,13 +311,12 @@ class PipeUnit:
 			# to be sure that we have unique list of pulsars (especially relevant for tabfind+ option)
 			self.psrs = np.unique(self.psrs)
 
-                # dspsr folding options
-                # making choice between -L %d   and "-s"
-                # by default -L is used, but if -s is given in the dspsr_extra_opts, then we should get rid of -L
-                self.dspsr_folding_options="-L %d" % (cmdline.opts.tsubint)
-                if re.match("^\-s$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-s$", cmdline.opts.dspsr_extra_opts) or \
-                   re.match("^.*\s+\-s\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-s\s+.*$", cmdline.opts.dspsr_extra_opts):
-                        self.dspsr_folding_options=""
+			# dspsr folding options
+			# making choice between -L %d   and "-s"
+			# by default -L is used, but if -s is given in the dspsr_extra_opts, then we should get rid of -L
+			self.dspsr_folding_options="-L %d" % (cmdline.opts.tsubint)
+			if re.match("^\-s$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-s$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-s\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-s\s+.*$", cmdline.opts.dspsr_extra_opts):
+			self.dspsr_folding_options=""
 
 	# function to set outdir and curdir directories
 	def set_outdir(self, obs, cep2, cmdline):
@@ -365,13 +362,13 @@ class PipeUnit:
 					self.rawdir = cep2.rawdir
 				self.processed_dir_root = cep2.processed_dir_root
 			else: # not CEP4
-                        	if cep2.rawdir[:5] == "/data":
-                                	myfiles=[ff for ff in self.tab.rawfiles[self.location] if "_P%03d_" % (self.part) in ff]
-	                                self.rawdir = "%s%s" % (cep2.rawdir, myfiles[0].split("/data")[-1].split("/")[0])
-        	                        self.processed_dir_root = "%s%s" % (cep2.processed_dir_root, myfiles[0].split("/data")[-1].split("/")[0])
-                	        else:
-                        	        self.rawdir = cep2.rawdir
-                                	self.processed_dir_root = cep2.processed_dir_root
+				if cep2.rawdir[:5] == "/data":
+					myfiles=[ff for ff in self.tab.rawfiles[self.location] if "_P%03d_" % (self.part) in ff]
+					self.rawdir = "%s%s" % (cep2.rawdir, myfiles[0].split("/data")[-1].split("/")[0])
+					self.processed_dir_root = "%s%s" % (cep2.processed_dir_root, myfiles[0].split("/data")[-1].split("/")[0])
+				else:
+					self.rawdir = cep2.rawdir
+					self.processed_dir_root = cep2.processed_dir_root
 
 			# if user specified output dir (relative to /data/LOFAR_PULSAR_....)
 			if cmdline.opts.outdir != "":
@@ -389,30 +386,30 @@ class PipeUnit:
 	# function to get feedback index for the feedback unit
 	def get_feedback_index(self, obs, cmdline):
 		fbindex=0
-                for sap in sorted(obs.saps, key=lambda x: x.sapid):
-       	                for tab in sorted(sap.tabs, key=lambda x: x.tabid):
+		for sap in sorted(obs.saps, key=lambda x: x.sapid):
+			for tab in sorted(sap.tabs, key=lambda x: x.tabid):
 				if self.sapid == sap.sapid and self.tabid == tab.tabid:
 					if tab.is_coherent: 
 						if obs.stokesCS == "IQUV": 
 							fbindex += 4 * (self.part - cmdline.opts.first_freq_splitCS)
 							fbindex += self.stokes_index
-	                	               	else: fbindex += (self.part - cmdline.opts.first_freq_splitCS)
+						else: fbindex += (self.part - cmdline.opts.first_freq_splitCS)
 					else:
 						if obs.stokesIS == "IQUV": 
 							fbindex += 4 * (self.part - cmdline.opts.first_freq_splitIS)
 							fbindex += self.stokes_index
-        	        	               	else: fbindex += (self.part - cmdline.opts.first_freq_splitIS)
+						else: fbindex += (self.part - cmdline.opts.first_freq_splitIS)
 					return fbindex
 				else:
-	               	                if tab.is_coherent:
-        	               	                if obs.stokesCS == "IQUV": 
+					if tab.is_coherent:
+						if obs.stokesCS == "IQUV": 
 							fbindex += 4 * cmdline.opts.nsplitsCS
-                	               	        else: fbindex += cmdline.opts.nsplitsCS
-                        	        else:
-       	                        	        if obs.stokesIS == "IQUV": 
+						else: fbindex += cmdline.opts.nsplitsCS
+					else:
+						if obs.stokesIS == "IQUV": 
 							fbindex += 4 * cmdline.opts.nsplitsIS
-               	                        	else: fbindex += cmdline.opts.nsplitsIS
-                return fbindex
+						else: fbindex += cmdline.opts.nsplitsIS
+				return fbindex
 
 	# function to initialize feedback unit (should be called after self.outdir is set)
 	def feedback_init(self, obs, cep2, cmdline):
@@ -501,9 +498,9 @@ class PipeUnit:
 				try:
 					cmd="rsync -a %s %s/%s.par" % (parfile, self.outdir, psrstem)
 					self.execute(cmd)
-                                        # also converting them to UNIX format (if were prepared on Macs for example)
-                                        # if they are in UNIX format already, nothing happens
-                                        cmd="dos2unix %s/%s.par" % (self.outdir, psrstem)
+					# also converting them to UNIX format (if were prepared on Macs for example)
+					# if they are in UNIX format already, nothing happens
+					cmd="dos2unix %s/%s.par" % (self.outdir, psrstem)
 					self.execute(cmd)
 				except: pass
 				return True
@@ -563,29 +560,29 @@ class PipeUnit:
 		tmpdir = tempfile.mkdtemp()
 
 		# Now we check the par-files if they have non-appropriate flags that can cause prepfold to crash
-                toremove_psrs=[] # list of pulsars to remove from folding in case there is a problem with the parfile (e.g. PEPOCH is absent)
+		toremove_psrs=[] # list of pulsars to remove from folding in case there is a problem with the parfile (e.g. PEPOCH is absent)
 		for psr in self.psrs:
 			psr2=re.sub(r'^[BJ]', '', psr)
 			parfile="%s/%s.par" % (self.outdir, psr2)
 			cmd="rsync -a %s %s" % (parfile, tmpdir)
 			self.execute(cmd)
 			parf="%s/%s" % (tmpdir, parfile.split("/")[-1])
-                        # check first that PEPOCH is in the parfile
-                        cmd="grep 'PEPOCH' %s" % (parf,)
-                	status=os.popen(cmd).readlines()
+			# check first that PEPOCH is in the parfile
+			cmd="grep 'PEPOCH' %s" % (parf,)
+			status=os.popen(cmd).readlines()
 			if np.size(status)==0:
-                                self.log.warning("WARNING: Par-file %s has no PEPOCH keyword, so this pulsar will be excluded from folding." % (parfile,))
-                                toremove_psrs.append(psr)
-                                continue
+				self.log.warning("WARNING: Par-file %s has no PEPOCH keyword, so this pulsar will be excluded from folding." % (parfile,))
+				toremove_psrs.append(psr)
+				continue
 			# check first for PSRB name. It should be changed to PSRJ
 			cmd="grep 'PSRB' %s" % (parf,)
-                	status=os.popen(cmd).readlines()
+			status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				self.log.warning("WARNING: Par-file %s has PSRB keyword that can cause prepfold to crash!\n\
 If your pipeline run calls prepfold you might need to change PSRB to PSRJ." % (parfile,))
 			# checking CLK flag
 			cmd="grep 'CLK' %s" % (parf,)
-                	status=os.popen(cmd).readlines()
+			status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				self.log.warning("WARNING: Par-file %s has CLK keyword that can cause prepfold to crash!\n\
 CLK line will be removed from the parfile!" % (parfile,))
@@ -595,7 +592,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 				self.execute(cmd)
 			# checking for UNITS flag
 			cmd="grep 'UNITS' %s" % (parf,)
-                	status=os.popen(cmd).readlines()
+			status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				self.log.warning("WARNING: Par-file %s has UNITS keyword that can cause prepfold to crash!\n\
 UNITS line will be removed from the parfile!" % (parfile,))
@@ -603,40 +600,39 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				self.execute(cmd, self.log, is_os=True)
 				cmd="rsync -a %s %s" % (parf, self.outdir)
 				self.execute(cmd)
-                # removing pulsars from folding if their parfile is bad (e.g. no PEPOCH)
-                if len(toremove_psrs) > 0:
-                        indices_to_remove=set()
-                        for psr in np.unique(toremove_psrs):
-                                for ii in xrange(len(self.psrs)):
-                                        if psr == self.psrs[ii]: indices_to_remove.add(ii) 
-                        indices_to_keep=sorted(set(np.arange(len(self.psrs)))-indices_to_remove)
-                        self.psrs = self.psrs[indices_to_keep]
+				# removing pulsars from folding if their parfile is bad (e.g. no PEPOCH)
+				if len(toremove_psrs) > 0:
+					indices_to_remove=set()
+					for psr in np.unique(toremove_psrs):
+						for ii in xrange(len(self.psrs)):
+							if psr == self.psrs[ii]: indices_to_remove.add(ii) 
+				indices_to_keep=sorted(set(np.arange(len(self.psrs)))-indices_to_remove)
+				self.psrs = self.psrs[indices_to_keep]
 		# return tmpdir
 		return tmpdir
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
-	    	"""
-        	Execute the command 'cmd' after logging the command
-            	and the wall-clock amount of time the command took to execute.
+		"""
+		Execute the command 'cmd' after logging the command
+		and the wall-clock amount of time the command took to execute.
 		This function waits for process to finish
-    		"""
+		"""
 		try:
 			self.log.info(re.sub("\n", "\\\\n", cmd))  # also escaping \n to show it as it is
-    			job_start = time.time()
+			job_start = time.time()
 			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
 			status = 1
 			if is_os: status = os.system(cmd)
 			else:
-               			process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell, bufsize=1048576)
+				process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell, bufsize=1048576)
 				self.procs.append(process)
-       	        		self.log.process2log(process)
-        	       		process.communicate()
+				self.log.process2log(process)
+				process.communicate()
 				status=process.poll()
 				self.procs.remove(process)
 			job_end = time.time()
 			job_total_time = job_end - job_start
-        	       	self.log.info("Finished at UTC %s, status=%s, Total running time: %.1f s (%.2f hrs)" % \
-					(time.asctime(time.gmtime()), status, job_total_time, job_total_time/3600.))
+			self.log.info("Finished at UTC %s, status=%s, Total running time: %.1f s (%.2f hrs)" % (time.asctime(time.gmtime()), status, job_total_time, job_total_time/3600.))
 			self.log.info("")
 			# if job is not successful
 			if status != 0:
@@ -646,23 +642,23 @@ UNITS line will be removed from the parfile!" % (parfile,))
 			raise Exception
 
 	def start_and_go(self, cmd, workdir=None, shell=False, immediate_status_check=False):
-	    	"""
-        	Execute the command 'cmd' after logging the command
+		"""
+		Execute the command 'cmd' after logging the command
 		This function start the cmd and leaves the function
 		returning the Popen object, it does not wait for process to finish
-    		"""
+		"""
 		status=1
 		try:
 			self.log.info(re.sub("\n", "\\\\n", cmd))
 			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
 			if immediate_status_check:
-               			process = Popen(shlex.split(cmd), cwd=workdir, shell=shell, bufsize=1048576)
+				process = Popen(shlex.split(cmd), cwd=workdir, shell=shell, bufsize=1048576)
 				time.sleep(10)  # waiting 10 secs to see if process crashes right away
 				if process.poll() is not None and process.poll() != 0:
 					raise Exception
 				else: process.kill()  # if process is still running, it means that cmd is good, so we kill it in order to
-							# restart it with proper stdout/stderr and add it to the list
-               		process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell, bufsize=1048576)
+			# restart it with proper stdout/stderr and add it to the list
+			process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell, bufsize=1048576)
 			status=process.returncode
 			self.procs.append(process)
 			self.log.info("Job pid=%d, not waiting for it to finish." % (process.pid))
@@ -695,31 +691,30 @@ UNITS line will be removed from the parfile!" % (parfile,))
 			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, popen.pid, popen.returncode))
 			raise Exception
 
-        def waiting_list(self, prg, popen_list):
-                """
-                Waiting for list of processes to finish
-                """
-                try:
-                        job_start = time.time()
-                        self.log.info("Waiting for %s processes to finish..." % (prg))
-                        run_units = [u.pid for u in popen_list if u.poll() is None]
-                        self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
-                        for unit in popen_list:
-                                self.waiting(prg, unit)
-                                run_units = [u.pid for u in popen_list if u.poll() is None]
-                                finished_units = [u for u in popen_list if u.poll() is not None]
-                                for fu in finished_units:
-                                        if fu.returncode != 0:
-                                                self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
-                                if len(run_units) > 0: self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
-                        job_end = time.time()
-                        job_total_time = job_end - job_start
-                        self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % \
-                                (prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
-                        self.log.info("")
-                except Exception:
-                        self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join(["%d" % (fu.pid) for fu in popen_list if fu.poll() is not None])))
-                        raise Exception
+	def waiting_list(self, prg, popen_list):
+		"""
+		Waiting for list of processes to finish
+		"""
+		try:
+			job_start = time.time()
+			self.log.info("Waiting for %s processes to finish..." % (prg))
+			run_units = [u.pid for u in popen_list if u.poll() is None]
+			self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
+			for unit in popen_list:
+				self.waiting(prg, unit)
+				run_units = [u.pid for u in popen_list if u.poll() is None]
+				finished_units = [u for u in popen_list if u.poll() is not None]
+				for fu in finished_units:
+					if fu.returncode != 0:
+						self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
+				if len(run_units) > 0: self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
+			job_end = time.time()
+			job_total_time = job_end - job_start
+			self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % (prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
+			self.log.info("")
+		except Exception:
+			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join(["%d" % (fu.pid) for fu in popen_list if fu.poll() is not None])))
+			raise Exception
 
 	"""
 	def waiting_list(self, prg, popen_list):
@@ -824,19 +819,19 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				if proc != None: proc.poll()
 		self.procs = []
 
-        # refresh NFS mounting of locus node (loc) on hoover node
-        # by doing 'ls' command
-        def hoover_mounting(self, cep2, firstfile, loc):
-                uniqdir="/".join(firstfile.split("/")[0:-1]).split("/data/")[-1]
-                input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-                process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-                process.communicate()
-                return input_dir
+	# refresh NFS mounting of locus node (loc) on hoover node
+	# by doing 'ls' command
+	def hoover_mounting(self, cep2, firstfile, loc):
+		uniqdir="/".join(firstfile.split("/")[0:-1]).split("/data/")[-1]
+		input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+		process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+		process.communicate()
+		return input_dir
 
 	# running prepfold(s) for all specified pulsars
 	# returning the Popen instances of prepfold calls
 	def start_prepfold(self, cmdline, total_chan):
-                if total_chan >= 256:
+		if total_chan >= 256:
 			prepfold_nsubs = 512
 		else: prepfold_nsubs = total_chan
 #		prepfold_nsubs = total_chan
@@ -922,9 +917,9 @@ UNITS line will be removed from the parfile!" % (parfile,))
 			montage_cmd="montage -background none -pointsize 10.2 "
 
 			# reading log file to get RFI fraction from rfifind
-                	logf = open(self.log.get_logfile(), 'r')
+			logf = open(self.log.get_logfile(), 'r')
 			rfifracs = [ff.split("(")[1].split("%")[0].lstrip() for ff in logf.read().splitlines() if re.search("Number of  bad", ff) is not None]
-	                logf.close()
+			logf.close()
 			if np.size(rfifracs) == 0: rfifrac="" # in case we did not run rfifind
 			elif np.size(rfifracs) > 1: rfifrac = rfifracs[-1]
 			else: rfifrac = rfifracs[0]
@@ -950,14 +945,14 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				# calculating the S/N (profile significance) from the bestprof file
 				snr=0.0
 				try:
-                                        import tempfile
-                                        snrtmpdir = tempfile.mkdtemp()
-                                        snrlog="%s/snr-presto.log" % (snrtmpdir)
-                                        if not os.path.exists("%s/%s" % (self.curdir, snrlog)):
-                                                cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, self.curdir, snrlog)    
-                                                self.execute(cmd, workdir=self.curdir, is_os=True)
-                                        tmp = np.genfromtxt("%s/%s" % (self.curdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
-                                        snr = float(tmp[0])
+					import tempfile
+					snrtmpdir = tempfile.mkdtemp()
+					snrlog="%s/snr-presto.log" % (snrtmpdir)
+					if not os.path.exists("%s/%s" % (self.curdir, snrlog)):
+						cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, self.curdir, snrlog)    
+						self.execute(cmd, workdir=self.curdir, is_os=True)
+					tmp = np.genfromtxt("%s/%s" % (self.curdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+					snr = float(tmp[0])
 				except:
 					if self.sapid == cursapid and self.procdir == curprocdir:
 						self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
@@ -968,10 +963,10 @@ UNITS line will be removed from the parfile!" % (parfile,))
 			chif.close()
 			cmd="mv %s_sap%03d_tab%04d_stokes%d_part%03d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid, self.stokes_index, self.part)
 			self.execute(cmd, workdir=self.outdir)
-            cmd="cp %s/%s %s" % (self.curdir, snrlog, self.curdir)
-            self.execute(cmd, workdir=self.outdir)
-            cmd="rm -rf %s" % (snrtmpdir)
-            os.system(cmd)
+			cmd="cp %s/%s %s" % (self.curdir, snrlog, self.curdir)
+			self.execute(cmd, workdir=self.outdir)
+			cmd="rm -rf %s" % (snrtmpdir)
+			os.system(cmd)
 
 			# creating combined plots
 			# only creating combined plo % (snrtmpdir)ts when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
@@ -1022,24 +1017,24 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
 			dmstep=0.01
 			numdms=1000 # 1000 is the maximum
-                        # parsing prepsubband extra options for 'numdms', if there are no such option we will use default numdms=1000, if there
-                        # are several, we will use only the last one
-                        pattern = "\-numdms\s+(\d+)"
-                        numdms_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
-                        if len(numdms_list) != 0: numdms = int(numdms_list[-1])
-                        # parsing prepsubband extra options for 'dmstep', if there are no such option we will use default dmstep=0.01, if there
-                        # are several, we will use only the last one
-                        pattern = "\-dmstep\s+([\d\.]+)"
-                        dmstep_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
-                        if len(dmstep_list) != 0: dmstep = float(dmstep_list[-1])
-                        # parsing prepsubband extra options for 'lodm', if there are no such option we will calculate it as lodm=psrdm-0.5*dmstep*numdms
-                        # if there are several, we will only use the last one
-                        pattern = "\-lodm\s+([\d\.]+)"
-                        lodm_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
-                        if len(lodm_list) != 0: 
-                                lodm = float(lodm_list[-1])
-                        else:
-			        lodm = psrdm - 0.5*dmstep*numdms # we want to cover +-5 in DM with 0.01 steps (by default), i.e. ~1000 DM trials
+			# parsing prepsubband extra options for 'numdms', if there are no such option we will use default numdms=1000, if there
+			# are several, we will use only the last one
+			pattern = "\-numdms\s+(\d+)"
+			numdms_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
+			if len(numdms_list) != 0: numdms = int(numdms_list[-1])
+			# parsing prepsubband extra options for 'dmstep', if there are no such option we will use default dmstep=0.01, if there
+			# are several, we will use only the last one
+			pattern = "\-dmstep\s+([\d\.]+)"
+			dmstep_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
+			if len(dmstep_list) != 0: dmstep = float(dmstep_list[-1])
+			# parsing prepsubband extra options for 'lodm', if there are no such option we will calculate it as lodm=psrdm-0.5*dmstep*numdms
+			# if there are several, we will only use the last one
+			pattern = "\-lodm\s+([\d\.]+)"
+			lodm_list=re.findall(pattern, cmdline.opts.prepdata_extra_opts)
+			if len(lodm_list) != 0: 
+				lodm = float(lodm_list[-1])
+			else:
+				lodm = psrdm - 0.5*dmstep*numdms # we want to cover +-5 in DM with 0.01 steps (by default), i.e. ~1000 DM trials
 			if lodm <= 0.0: lodm = 0.01 # because we will do DM=0 with prepdata anyway
 			# running prepdata for DM=0 with mask (if --norfi was not set)
 			if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
@@ -1354,17 +1349,16 @@ UNITS line will be removed from the parfile!" % (parfile,))
 
 			# if we run the whole processing and not just plots
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
-
-                                # converting raw data to 8 bits
-                                if not cmdline.opts.is_nodecode and cmdline.opts.is_raw_to_8bit:
-                                        # creating directory for 8-bit raw data (raw-8bit)
-                                        cmd="mkdir -m 775 -p %s/%s" % (self.curdir, self.raw_8bit_dir)
-                                        self.execute(cmd)
-                                        verbose=""
-                                        if cmdline.opts.is_debug: verbose="-v"
-                                        self.log.info("Converting raw 32-bit data to 8 bits...")
-                                        cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, input_file.replace(".raw", ".h5"))
-                                        self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
+				# converting raw data to 8 bits
+				if not cmdline.opts.is_nodecode and cmdline.opts.is_raw_to_8bit:
+					# creating directory for 8-bit raw data (raw-8bit)
+					cmd="mkdir -m 775 -p %s/%s" % (self.curdir, self.raw_8bit_dir)
+					self.execute(cmd)
+					verbose=""
+					if cmdline.opts.is_debug: verbose="-v"
+					self.log.info("Converting raw 32-bit data to 8 bits...")
+					cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, input_file.replace(".raw", ".h5"))
+					self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
 
 				# running data conversion (2bf2fits)
 				if not cmdline.opts.is_nodecode:
@@ -1435,9 +1429,9 @@ self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
 						# waiting for dspsr to finish
 						self.waiting_list("dspsr", dspsr_popens)
 
-                                                # fixing coordinates in the ar-file
+						# fixing coordinates in the ar-file
 						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-                                                	fix_header_coords(self, self, psr, self.curdir, self.output_prefix)
+							fix_header_coords(self, self, psr, self.curdir, self.output_prefix)
 
 						for psr in self.psrs:  # pulsar list is empty if --nofold is used
 							self.log.info("Running post-dspsr processing for pulsar %s..." % (psr))
@@ -1649,17 +1643,16 @@ self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
 			total_chan = nsubs_eff * self.nrChanPerSub
 
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
-
-                                # converting raw data to 8 bits
-                                if not cmdline.opts.is_nodecode and cmdline.opts.is_raw_to_8bit:
-                                        # creating directory for 8-bit raw data (raw-8bit)
-                                        cmd="mkdir -m 775 -p %s/%s" % (self.curdir, self.raw_8bit_dir)
-                                        self.execute(cmd)
-                                        verbose=""
-                                        if cmdline.opts.is_debug: verbose="-v"
-                                        self.log.info("Converting raw 32-bit data to 8 bits...")
-                                        cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, " ".join(["%s/%s" % (self.curdir, ff) for ff in input_files]))
-                                        self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
+				# converting raw data to 8 bits
+				if not cmdline.opts.is_nodecode and cmdline.opts.is_raw_to_8bit:
+					# creating directory for 8-bit raw data (raw-8bit)
+					cmd="mkdir -m 775 -p %s/%s" % (self.curdir, self.raw_8bit_dir)
+					self.execute(cmd)
+					verbose=""
+					if cmdline.opts.is_debug: verbose="-v"
+					self.log.info("Converting raw 32-bit data to 8 bits...")
+					cmd="python %s/digitize.py %s -s %g -o %s/%s %s" % (cep2.lofarsoft_bin, verbose, cmdline.opts.digitize_sigma, self.curdir, self.raw_8bit_dir, " ".join(["%s/%s" % (self.curdir, ff) for ff in input_files]))
+					self.execute(cmd, workdir="%s/%s" % (self.curdir, self.raw_8bit_dir))
 
 				# getting the list of S? files, the number of which is how many freq splits we have
 				# we also sort this list by split number
@@ -1678,10 +1671,10 @@ self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
 							self.log.info("Running dspsr for pulsar %s..." % (psr))
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
-                                                        # refreshing NFS mounting of locus nodes
-                                                        for loc in self.tab.location:
-                                                                if loc in self.tab.rawfiles:
-                                                                        self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
+							# refreshing NFS mounting of locus nodes
+							for loc in self.tab.location:
+								if loc in self.tab.rawfiles:
+									self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
 							if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_dspsr:
 								cmd="dspsr -b %d -A %s %s -E %s/%s.par -O %s_%s_P%d -t %d %s %s" % \
@@ -1711,7 +1704,7 @@ self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
 							self.execute(cmd, workdir=self.curdir)
 
 							# fixing coordinates in the ar-file
-	                                                fix_header_coords(self, self, psr, self.curdir, self.output_prefix)
+							fix_header_coords(self, self, psr, self.curdir, self.output_prefix)
 
 							# running common DSPSR post-processing
 							dspsr_postproc(self, self, cmdline, obs, psr, total_chan, nsubs_eff, self.curdir, self.output_prefix)

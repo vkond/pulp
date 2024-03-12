@@ -43,10 +43,10 @@ class Pipeline:
 
 		already_assigned_nodes=[] # list of nodes that already assigned as host nodes for processing of one of the parts
 		# initializing Processing Units based on the list of beams to process
-                for beam in cmdline.beams:
+		for beam in cmdline.beams:
 			tab = 0
-                        sapid=int(beam.split(":")[0])
-                        tabid=int(beam.split(":")[1])
+			sapid=int(beam.split(":")[0])
+			tabid=int(beam.split(":")[1])
 			for ss in obs.saps:
 				if ss.sapid == sapid:
 					for tt in ss.tabs:
@@ -293,9 +293,9 @@ class Pipeline:
 
 
 	# get total number of feedback units (so to know what index to assign for summary feedbacks)
-        # function to initialize feedback unit (should be called after self.outdir is set)
-        def get_number_fbunits(self, obs, cmdline):
-                nunits=0
+	# function to initialize feedback unit (should be called after self.outdir is set)
+	def get_number_fbunits(self, obs, cmdline):
+		nunits=0
 		for sap in obs.saps:
 			for tab in sap.tabs:
 				if tab.is_coherent:
@@ -506,25 +506,25 @@ class Pipeline:
 
 	# execute command on local node (similar to execute in PipeUnit)
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
-	    	"""
-        	Execute the command 'cmd' after logging the command
-            	and the wall-clock amount of time the command took to execute.
+		"""
+		Execute the command 'cmd' after logging the command
+		and the wall-clock amount of time the command took to execute.
 		This function waits for process to finish
-    		"""
+		"""
 		try:
 			self.log.info(re.sub("\n", "\\\\n", cmd))  # also escaping \n to show it as it is
-    			job_start = time.time()
+			job_start = time.time()
 			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
 			status = 1
 			if is_os: status = os.system(cmd)
 			else:
-               			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
-       	        		self.log.process2log(proc)
-        	       		proc.communicate()
+				proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
+				self.log.process2log(proc)
+				proc.communicate()
 				status = proc.poll()
 			job_end = time.time()
 			job_total_time = job_end - job_start
-        	       	self.log.info("Finished at UTC %s, status=%s, Total running time: %.1f s (%.2f hrs)" % \
+			self.log.info("Finished at UTC %s, status=%s, Total running time: %.1f s (%.2f hrs)" % \
 					(time.asctime(time.gmtime()), status, job_total_time, job_total_time/3600.))
 			self.log.info("")
 			# if job is not successful
@@ -535,83 +535,81 @@ class Pipeline:
 			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
 			raise Exception
 
-        def start_and_go(self, cmd, workdir=None, shell=False, immediate_status_check=False):
-                """
-                Execute the command 'cmd' after logging the command
-                This function start the cmd and leaves the function
-                returning the Popen object, it does not wait for process to finish
-                """
-                status=1
-                try:
-                        self.log.info(re.sub("\n", "\\\\n", cmd))
-                        self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
-                        if immediate_status_check:
-                                process = Popen(shlex.split(cmd), cwd=workdir, shell=shell)
-                                time.sleep(10)  # waiting 10 secs to see if process crashes right away
-                                if process.poll() is not None and process.poll() != 0:
-                                        raise Exception
-                                else: process.kill()  # if process is still running, it means that cmd is good, so we kill it in order to
-                                                        # restart it with proper stdout/stderr and add it to the list
-                        process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
-                        status=process.returncode
-                        self.log.info("Job pid=%d, not waiting for it to finish." % (process.pid))
-                        return process
-                except Exception:
-                        self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (re.sub("\n", "\\\\n", cmd), status))
+	def start_and_go(self, cmd, workdir=None, shell=False, immediate_status_check=False):
+		"""
+		Execute the command 'cmd' after logging the command
+		This function start the cmd and leaves the function
+		returning the Popen object, it does not wait for process to finish
+		"""
+		status=1
+		try:
+			self.log.info(re.sub("\n", "\\\\n", cmd))
+			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
+			if immediate_status_check:
+				process = Popen(shlex.split(cmd), cwd=workdir, shell=shell)
+				time.sleep(10)  # waiting 10 secs to see if process crashes right away
+				if process.poll() is not None and process.poll() != 0:
+					raise Exception
+			else: process.kill()  # if process is still running, it means that cmd is good, so we kill it in order to
+								# restart it with proper stdout/stderr and add it to the list
+			process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
+			status=process.returncode
+			self.log.info("Job pid=%d, not waiting for it to finish." % (process.pid))
+			return process
+		except Exception:
+			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (re.sub("\n", "\\\\n", cmd), status))
 			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
-                        raise Exception
+			raise Exception
 	
 	# waiting for the command to finish
-        def waiting(self, prg, popen):
-                """
-                Waiting for process to finish
-                """
-                try:
-                        job_start = time.time()
-                        self.log.info("Waiting for %s to finish, pid=%d" % (prg, popen.pid))
-                        (sout, serr) = popen.communicate()
-                        # we pipe serr to sout, so no need to log serr
-                        self.log.info(sout)
-                        job_end = time.time()
-                        job_total_time = job_end - job_start
-                        self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Waiting time: %.1f s (%.2f hrs)" % \
-                                (popen.pid, prg, time.asctime(time.gmtime()), popen.returncode, job_total_time, job_total_time/3600.))
-                        self.log.info("")
-                        # if job is not successful
-                        if popen.poll() != 0:
-                                raise Exception
-                except Exception:
-                        self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, popen.pid, popen.returncode))
+	def waiting(self, prg, popen):
+		"""
+		Waiting for process to finish
+		"""
+		try:
+			job_start = time.time()
+			self.log.info("Waiting for %s to finish, pid=%d" % (prg, popen.pid))
+			(sout, serr) = popen.communicate()
+			# we pipe serr to sout, so no need to log serr
+			self.log.info(sout)
+			job_end = time.time()
+			job_total_time = job_end - job_start
+			self.log.info("Process pid=%d (%s) has finished at UTC %s, status=%d, Waiting time: %.1f s (%.2f hrs)" % \	(popen.pid, prg, time.asctime(time.gmtime()), popen.returncode, job_total_time, job_total_time/3600.))
+			self.log.info("")
+			# if job is not successful
+			if popen.poll() != 0:
+				raise Exception
+		except Exception:
+			self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, popen.pid, popen.returncode))
 			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
-                        raise Exception
+			raise Exception
 
-        def waiting_list(self, prg, popen_list):
-                """
-                Waiting for list of processes to finish
-                """
-                try:
-                        job_start = time.time()
-                        self.log.info("Waiting for %s processes to finish..." % (prg))
-                        run_units = [u.pid for u in popen_list if u.poll() is None]
-                        self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
-                        for unit in popen_list:
-                                self.waiting(prg, unit)
-                                run_units = [u.pid for u in popen_list if u.poll() is None]
-                                finished_units = [u for u in popen_list if u.poll() is not None]
-                                for fu in finished_units:
-                                        if fu.returncode != 0:
-                                                self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
-                                if len(run_units) > 0: self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
-                        job_end = time.time()
-                        job_total_time = job_end - job_start
-                        self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % \
-                                (prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
-                        self.log.info("")
-                except Exception:
-                        self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join(["%d" % (fu.pid) for fu in popen_list if fu.poll() is not None])))
+	def waiting_list(self, prg, popen_list):
+		"""
+		Waiting for list of processes to finish
+		"""
+		try:
+			job_start = time.time()
+			self.log.info("Waiting for %s processes to finish..." % (prg))
+			run_units = [u.pid for u in popen_list if u.poll() is None]
+			self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
+			for unit in popen_list:
+				self.waiting(prg, unit)
+				run_units = [u.pid for u in popen_list if u.poll() is None]
+				finished_units = [u for u in popen_list if u.poll() is not None]
+				for fu in finished_units:
+					if fu.returncode != 0:
+						self.log.exception("Oops... %s has crashed!\npid=%d, Status=%s" % (prg, fu.pid, fu.returncode))
+				if len(run_units) > 0: 
+					self.log.info("Still running [%d]: %s" % (len(run_units), run_units))
+				job_end = time.time()
+				job_total_time = job_end - job_start
+				self.log.info("Processes of %s have finished at UTC %s, Waiting time: %.1f s (%.2f hrs)" % \ (prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
+				self.log.info("")
+		except Exception:
+			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join(["%d" % (fu.pid) for fu in popen_list if fu.poll() is not None])))
 			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
-                        raise Exception
-
+			raise Exception
 
 	# function that checks all processes in the list and kill them if they are still running
 	def kill(self, log=None):
@@ -683,9 +681,9 @@ class Pipeline:
 				is_to_combine=False
 				if cmdline.opts.is_nohoover: # are not using hoover nodes
 					for u in self.units: # checking if we actually have data spread across several nodes
-                        			is_iquv = False
-			                        if (u.tab.is_coherent and obs.stokesCS == "IQUV") or (u.tab.is_coherent == False and obs.stokesIS == "IQUV"):
-	                        		        is_iquv = True
+						is_iquv = False
+						if (u.tab.is_coherent and obs.stokesCS == "IQUV") or (u.tab.is_coherent == False and obs.stokesIS == "IQUV"):
+							is_iquv = True
 						if (len(u.tab.location) > 1 or cmdline.opts.is_all_parts_at_once) and not (is_iquv and ((u.tab.is_coherent and obs.nsplitsCS == 1) \
 						or (u.tab.is_coherent == False and obs.nsplitsIS == 1))):
 							is_to_combine=True
@@ -765,15 +763,14 @@ class Pipeline:
 				if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 					for psr in ref_unit.psrs:
 						self.log.info("Combining parts for pulsar %s..." % (psr))
-	
-        	                                # running psradd to add all freq channels together
-                	                        self.log.info("Adding frequency splits together...")
-                        	                ar_files=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
+						# running psradd to add all freq channels together
+						self.log.info("Adding frequency splits together...")
+						ar_files=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
 						if len(ar_files) == 0:
 							self.log.info("skipped")
 						else:
-                                	        	cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
-                                        		self.execute(cmd, workdir=curdir)
+							cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
+							self.execute(cmd, workdir=curdir)
 
 							# check if number of ar-files is equal to number of splits
 							if len(ar_files) < int(proc_subs/ref_unit.nrSubsPerFile):
@@ -787,19 +784,18 @@ class Pipeline:
 
 							# running common DSPSR post-processing
 							dspsr_postproc(self, ref_unit, cmdline, obs, psr, total_chan, nsubs_eff, curdir, output_prefix)
-							
-                                	       	        # removing ar-files from dspsr for every frequency split
-                                        	       	if not cmdline.opts.is_debug:
-                                                	       	remove_list=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
-                                                        	cmd="rm -f %s" % (" ".join(remove_list))
-       	                                                	self.execute(cmd, workdir=curdir)
+							# removing ar-files from dspsr for every frequency split
+							if not cmdline.opts.is_debug:
+								remove_list=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
+								cmd="rm -f %s" % (" ".join(remove_list))
+								self.execute(cmd, workdir=curdir)
 
 						# combining fil-files after digifil if we do single-pulse analysis for CV data only
 						if cmdline.opts.is_single_pulse and obs.CV:
 							try:
 								self.log.info("Adding frequency splits together for single-pulse analysis...")
 								# we sort the list of fil-files in decrease frequency order (needed for sigproc_splice)
-                        	                		fil_files=sorted(glob.glob("%s/%s_%s_P*.fil" % (curdir, psr, output_prefix)), key=lambda x: int(x.split("_PART")[-1].split(".fil")[0]), reverse=True)
+								fil_files=sorted(glob.glob("%s/%s_%s_P*.fil" % (curdir, psr, output_prefix)), key=lambda x: int(x.split("_PART")[-1].split(".fil")[0]), reverse=True)
 								if len(fil_files) == 0:
 									self.log.info("skipped")
 								else:
@@ -905,15 +901,14 @@ class Pipeline:
 						# loop on pulsars
 						for psr in ref_unit.psrs:
 							self.log.info("Combining parts for pulsar %s..." % (psr))
-		
-       		        	                        # running psradd to add all freq channels together
-               		        	                self.log.info("Adding frequency splits together...")
-                       		        	        ar_files=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
+							# running psradd to add all freq channels together
+							self.log.info("Adding frequency splits together...")
+							ar_files=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
 							if len(ar_files) == 0:
 								self.log.info("skipped")
 							else:
-       		                        	        	cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
-               		                        		self.execute(cmd, workdir=curdir)
+								cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
+								self.execute(cmd, workdir=curdir)
 
 								# check if number of ar-files is equal to number of splits
 								if len(ar_files) < int(proc_subs/ref_unit.nrSubsPerFile):
@@ -928,11 +923,11 @@ class Pipeline:
 								# running common DSPSR post-processing
 								dspsr_postproc(self, ref_unit, cmdline, obs, psr, total_chan, nsubs_eff, curdir, output_prefix)
 							
-                               			       	        # removing ar-files from dspsr for every frequency split
-                                       			       	if not cmdline.opts.is_debug:
-                                               			       	remove_list=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
-                                                       			cmd="rm -f %s" % (" ".join(remove_list))
-                                                       			self.execute(cmd, workdir=curdir)
+								# removing ar-files from dspsr for every frequency split
+								if not cmdline.opts.is_debug:
+									remove_list=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
+									cmd="rm -f %s" % (" ".join(remove_list))
+									self.execute(cmd, workdir=curdir)
 
 					# running pav
 					if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_feedback:
@@ -981,8 +976,8 @@ class Pipeline:
 			already_extracted=[] # list of archives already extracted (to prevent the same archive to be extracted many times in case multiple parts)
 			for unit in workunits:
 				result_archive="%s_SAP%03d_B%03d_P%03d%s" % (cep2.pipeid, unit.sapid, unit.tabid, unit.part, unit.archive_suffix)
-	                        if result_archive in already_extracted: continue
-        	                else: already_extracted.append(result_archive)
+				if result_archive in already_extracted: continue
+				else: already_extracted.append(result_archive)
 				if os.path.exists("%s/%s" % (sumdir, result_archive)):
 					# extracting archive
 					cmd="tar xvf %s" % (result_archive)
@@ -1032,7 +1027,7 @@ class Pipeline:
 		beam_process_node_file="%s/beam_process_node.txt" % (sumdir)
 		if not os.path.exists(beam_process_node_file) or os.path.getsize(beam_process_node_file) == 0:
 			self.log.info("Creating the beam_process_node.txt file...")
-        	        bpnf=open(beam_process_node_file, 'w')
+			bpnf=open(beam_process_node_file, 'w')
 			for unit in workunits:
 				for node in unit.tab.location:
 					if node in unit.tab.rawfiles:
@@ -1108,12 +1103,12 @@ class Pipeline:
 					if len(arfs) == 0:
 						arfs=rglob(sumdir, "*.fscr.AR", 3)
 					if len(arfs) > 0:
-                        			chif=open("%s/chi-squared.txt" % (sumdir), 'w')
+						chif=open("%s/chi-squared.txt" % (sumdir), 'w')
 						for arf in arfs:
 							try:
-                                        			psr=arf.split("/")[-1].split("_")[0]
-                                        			cursapid=int(arf.split("_SAP")[-1].split("_")[0])
-                                				curprocdir=arf.split("_SAP")[-1].split("_")[1].split(".")[0]
+								psr=arf.split("/")[-1].split("_")[0]
+								cursapid=int(arf.split("_SAP")[-1].split("_")[0])
+								curprocdir=arf.split("_SAP")[-1].split("_")[1].split(".")[0]
 								cmd="psrstat -Q -j FTp -c snr %s" % (arf)
 								snrline=os.popen(cmd).readlines()
 								if np.size(snrline) > 0:
@@ -1299,9 +1294,9 @@ class Pipeline:
 			self.log.info("Extracting archives in summary nodes, removing archives, moving log-files...")
 			already_extracted=[] # list of archives already extracted (to prevent the same archive to be extracted many times in case multiple parts)
 			for unit in workunits:
-                		is_iquv = False
-                		if (unit.tab.is_coherent and obs.stokesCS == "IQUV") or (unit.tab.is_coherent == False and obs.stokesIS == "IQUV"):
-                        		is_iquv = True
+				is_iquv = False
+				if (unit.tab.is_coherent and obs.stokesCS == "IQUV") or (unit.tab.is_coherent == False and obs.stokesIS == "IQUV"):
+					is_iquv = True
 				if is_iquv:
 					result_archive="%s_SAP%03d_B%03d_S%d_P%03d%s" % (cep2.pipeid, unit.sapid, unit.tabid, unit.stokes_index, unit.part, unit.archive_suffix)
 				else:
@@ -1348,9 +1343,9 @@ class Pipeline:
 			self.log.info("Moving log-files...")
 			# moving log-file to corresponding SAP/BEAM directory
 			for unit in workunits:
-                		is_iquv = False
-                		if (unit.tab.is_coherent and obs.stokesCS == "IQUV") or (unit.tab.is_coherent == False and obs.stokesIS == "IQUV"):
-                        		is_iquv = True
+				is_iquv = False
+				if (unit.tab.is_coherent and obs.stokesCS == "IQUV") or (unit.tab.is_coherent == False and obs.stokesIS == "IQUV"):
+					is_iquv = True
 				if is_iquv:
 					beamlog="%s_sap%03d_beam%04d_stokes%d.log" % (obs.id, unit.sapid, unit.tabid, unit.stokes_index)
 				else:
@@ -1383,27 +1378,27 @@ class Pipeline:
 		rfis={}
 		beamlogs=[log for log in rglob(sumdir, "*.log", 3)]
 		for beamlog in beamlogs:
-                        # excluding log-files in root directory (*_summary.log, *_pulp.log, pipeline.log, etc)
-                        if beamlog.find("/SAP") < 0: continue
+			# excluding log-files in root directory (*_summary.log, *_pulp.log, pipeline.log, etc)
+			if beamlog.find("/SAP") < 0: continue
 			# reading log file to get RFI fraction from rfifind
-                        logf = open(beamlog, 'r')
-      			rfifracs = [ff.split("(")[1].split("%")[0].lstrip() for ff in logf.read().splitlines() if re.search("Number of  bad", ff) is not None]
-                        logf.close()
-	  		cursapid=int(beamlog.split("/SAP")[-1].split("/")[0])
+			logf = open(beamlog, 'r')
+			rfifracs = [ff.split("(")[1].split("%")[0].lstrip() for ff in logf.read().splitlines() if re.search("Number of  bad", ff) is not None]
+			logf.close()
+			cursapid=int(beamlog.split("/SAP")[-1].split("/")[0])
 			curprocdir=beamlog.split("/SAP")[-1].split("/")[1]
-                        if np.size(rfifracs) == 0: rfifrac="" # in case we did not run rfifind
-                        elif np.size(rfifracs) > 1: rfifrac = rfifracs[-1]
-                        else: rfifrac = rfifracs[0]
+			if np.size(rfifracs) == 0: rfifrac="" # in case we did not run rfifind
+			elif np.size(rfifracs) > 1: rfifrac = rfifracs[-1]
+			else: rfifrac = rfifracs[0]
 			rfis["%d_%s" % (cursapid, curprocdir)] = rfifrac
 
 		# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
 		if not cmdline.opts.is_nofold:
 			self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
-                        # also preparing montage command to create combined plot
-	       	        montage_cmd="montage -background none -pointsize 10.2 "
-	       	        montage_cmd_pdf="montage -geometry 100% -adjoin -tile 1x1 -pointsize 12 "
-                	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
-     	       	        psr_bestprofs=sorted(rglob(sumdir, "*.pfd.bestprof", 3))
+			# also preparing montage command to create combined plot
+			montage_cmd="montage -background none -pointsize 10.2 "
+			montage_cmd_pdf="montage -geometry 100% -adjoin -tile 1x1 -pointsize 12 "
+			chif=open("%s/chi-squared.txt" % (sumdir), 'w')
+			psr_bestprofs=sorted(rglob(sumdir, "*.pfd.bestprof", 3))
 			if len(psr_bestprofs) > 0:
 				# check first if all available *bestprof files are those created without mask. If so, then allow to make
 				# a diagnostic combined plot using prepfold plots without a mask
@@ -1422,39 +1417,38 @@ class Pipeline:
 						# adding bestprof files that were only made with _nomask_ to the list of good bestprofs
 						good_bestprofs.extend(only_nomask_bestprofs)
 					
-                       		for bp in good_bestprofs:
-               	               		psr=bp.split("/")[-1].split("_")[0]
-                	        	thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+						for bp in good_bestprofs:
+							psr=bp.split("/")[-1].split("_")[0]
+							thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
 					# we need it for combined.pdf
 					bigfile=thumbfile.split(".th.png")[0] + ".png"
 
-               	        		# getting current number for SAP and TA beam (or station name for FE)
+						# getting current number for SAP and TA beam (or station name for FE)
 					try: # we need this try block in case User manually creates sub-directories with some test bestprof files there
 					     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
 					     # on a wrong-formed string applying int()
-                      		  		cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+						cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
 					except: continue
-               	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
+					curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
 
 					# getting Stokes index if this is IQUV data
 					stokes=""
 					if is_iquv:
 						stokes = bigfile.split("%s_S" % (curprocdir))[-1].split("_")[0]
-
-                                	# calculating the S/N (profile significance) from the bestprof file
-                                        snr=0.0
-                                        try:
-                                                locdir="/".join(bp.split("/")[0:-1])
-                                                import tempfile
-                                                snrtmpdir=tempfile.mkdtemp()
-                                                snrlog="%s/snr-presto.log" % (snrtmpdir)
-                                                if not os.path.exists("%s/%s" % (locdir, snrlog)):
-                                                        cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, locdir, snrlog)
-                                                        self.execute(cmd, workdir=locdir, is_os=True)
-                                                tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
-                                                snr = float(tmp[0])
-                                        except:
-                	                        self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
+						# calculating the S/N (profile significance) from the bestprof file
+						snr=0.0
+						try:
+							locdir="/".join(bp.split("/")[0:-1])
+							import tempfile
+							snrtmpdir=tempfile.mkdtemp()
+							snrlog="%s/snr-presto.log" % (snrtmpdir)
+							if not os.path.exists("%s/%s" % (locdir, snrlog)):
+								cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, locdir, snrlog)
+								self.execute(cmd, workdir=locdir, is_os=True)
+								tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+								snr = float(tmp[0])
+						except:
+							self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
 
 					# getting the part number if there are many splits
 					curpart=""
@@ -1464,45 +1458,46 @@ class Pipeline:
 					# check if key exists in a rfis dictionary
 					if "%d_%s" % (cursapid, curprocdir) in rfis:
 						rfifrac = rfis["%d_%s" % (cursapid, curprocdir)]
-					else: rfifrac = ""
-	                        	chif.write("file=%s obs=%s_SAP%d_%s%s%s_%s S/N=%g%s\n" % (thumbfile, data_code, \
-								cursapid, curprocdir, stokes != "" and "_S%s" % (stokes) or "", curpart != "" and "_PART%s" % (curpart) or "", psr, snr, rfifrac != "" and " RFI=%s" % (rfifrac) or ""))
+					else: 
+						rfifrac = ""
+						chif.write("file=%s obs=%s_SAP%d_%s%s%s_%s S/N=%g%s\n" % (thumbfile, data_code, \
+						cursapid, curprocdir, stokes != "" and "_S%s" % (stokes) or "", curpart != "" and "_PART%s" % (curpart) or "", psr, snr, rfifrac != "" and " RFI=%s" % (rfifrac) or ""))
 					if os.path.exists("%s/%s" % (sumdir, thumbfile)):
-        		                	montage_cmd += "-label '%s SAP%d %s%s%s\n%s\nS/N = %g' %s " % (data_code, \
-								cursapid, curprocdir, stokes != "" and "\nSTOKES_%s" % ("IQUV"[int(stokes)]) or "", \
-								curpart != "" and "%sPART%s" % (stokes != "" and " " or "\n", curpart) or "", psr, snr, thumbfile)
+						montage_cmd += "-label '%s SAP%d %s%s%s\n%s\nS/N = %g' %s " % (data_code, \
+						cursapid, curprocdir, stokes != "" and "\nSTOKES_%s" % ("IQUV"[int(stokes)]) or "", \
+						curpart != "" and "%sPART%s" % (stokes != "" and " " or "\n", curpart) or "", psr, snr, thumbfile)
 					if os.path.exists("%s/%s" % (sumdir, bigfile)):
 						montage_cmd_pdf += "-label '%s SAP%d %s%s%s\n%s\nS/N = %g' %s " % (data_code, \
 								cursapid, curprocdir, stokes != "" and "\nSTOKES_%s" % ("IQUV"[int(stokes)]) or "", \
 								curpart != "" and "%sPART%s" % (stokes != "" and " " or "\n", curpart) or "", psr, snr, bigfile)
-              	        chif.close()
-                    cmd="cp %s/%s %s" % (locdir, snrlog, locdir)
-                    self.execute(cmd, workdir=locdir)
-                    cmd="rm -rf %s" % (snrtmpdir)
-                    os.system(cmd)
+						chif.close()
+					cmd="cp %s/%s %s" % (locdir, snrlog, locdir)
+					self.execute(cmd, workdir=locdir)
+					cmd="rm -rf %s" % (snrtmpdir)
+					os.system(cmd)
 
 
 			# creating combined plots
 			if len(psr_bestprofs) > 0:
-                        	self.log.info("Combining all pfd.th.png files in a single combined plot...")
-        	        	montage_cmd += "combined.png"
+				self.log.info("Combining all pfd.th.png files in a single combined plot...")
+				montage_cmd += "combined.png"
 				self.execute(montage_cmd, workdir=sumdir)
 				# making thumbnail version of the combined plot
 				self.log.info("Making a thumbnail version of combined plot...")
-               	        	cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
-               			self.execute(cmd, workdir=sumdir)
+				cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
+				self.execute(cmd, workdir=sumdir)
 
 				# creating combined PDF plot with all prepfold plots - ONLY for FE 
 				if data_code == "CS" and obs.FE:
-                        		self.log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
-        	        		montage_cmd_pdf += "combined.pdf"
+					self.log.info("Combining all pfd.pdf files in a single combined multi-page PDF file...")
+					montage_cmd_pdf += "combined.pdf"
 					self.execute(montage_cmd_pdf, workdir=sumdir)
 
 		# create beam_process_node.txt file (this is only if file does not exist or it is empty)
 		beam_process_node_file="%s/beam_process_node.txt" % (sumdir)
 		if not os.path.exists(beam_process_node_file) or os.path.getsize(beam_process_node_file) == 0:
 			self.log.info("Creating the beam_process_node.txt file...")
-        	        bpnf=open(beam_process_node_file, 'w')
+			bpnf=open(beam_process_node_file, 'w')
 			for unit in workunits:
 				for node in unit.tab.location:
 					if node in unit.tab.rawfiles:
