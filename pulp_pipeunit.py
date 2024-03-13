@@ -940,18 +940,18 @@ UNITS line will be removed from the parfile!" % (parfile,))
 					cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
 				except: continue
 				curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
+				if self.sapid != cursapid or self.procdir != curprocdir:
+					continue
 				thumbs.append(thumbfile)
 				# calculating the S/N (profile significance) from the bestprof file
 				snr=0.0
 				try:
-					import tempfile
-					snrtmpdir = tempfile.mkdtemp()
-					snrlog="%s/snr-presto.log" % (snrtmpdir)
+					snrlog="snr-presto.log"
 					if not os.path.exists("%s/%s" % (self.curdir, snrlog)):
 						cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, self.curdir, snrlog)    
 						self.execute(cmd, workdir=self.curdir, is_os=True)
-					tmp = np.genfromtxt("%s/%s" % (self.curdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
-					snr = float(tmp[0])
+						tmp = np.genfromtxt("%s/%s" % (self.curdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+						snr = float(tmp[0])
 				except:
 					if self.sapid == cursapid and self.procdir == curprocdir:
 						self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
@@ -962,10 +962,6 @@ UNITS line will be removed from the parfile!" % (parfile,))
 			chif.close()
 			cmd="mv %s_sap%03d_tab%04d_stokes%d_part%03d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid, self.stokes_index, self.part)
 			self.execute(cmd, workdir=self.outdir)
-			cmd="cp %s/%s %s" % (self.curdir, snrlog, self.curdir)
-			self.execute(cmd, workdir=self.outdir)
-			cmd="rm -rf %s" % (snrtmpdir)
-			os.system(cmd)
 
 			# creating combined plots
 			# only creating combined plo % (snrtmpdir)ts when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on

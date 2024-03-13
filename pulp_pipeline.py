@@ -1440,9 +1440,7 @@ class Pipeline:
 					snr=0.0
 					try:
 						locdir="/".join(bp.split("/")[0:-1])
-						import tempfile
-						snrtmpdir=tempfile.mkdtemp()
-						snrlog="%s/snr-presto.log" % (snrtmpdir)
+						snrlog="snr-presto.log"
 						if not os.path.exists("%s/%s" % (locdir, snrlog)):
 							cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, locdir, snrlog)
 							self.execute(cmd, workdir=locdir, is_os=True)
@@ -1472,11 +1470,6 @@ class Pipeline:
 								cursapid, curprocdir, stokes != "" and "\nSTOKES_%s" % ("IQUV"[int(stokes)]) or "", \
 								curpart != "" and "%sPART%s" % (stokes != "" and " " or "\n", curpart) or "", psr, snr, bigfile)
 			chif.close()
-			cmd="cp %s/%s %s" % (locdir, snrlog, locdir)
-			self.execute(cmd, workdir=locdir)
-			cmd="rm -rf %s" % (snrtmpdir)
-			os.system(cmd)
-
 
 			# creating combined plots
 			if len(psr_bestprofs) > 0:
