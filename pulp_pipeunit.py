@@ -66,7 +66,7 @@ def dspsr_postproc(root, ref, cmdline, obs, psr, total_chan, nsubs_eff, curdir, 
 	# dedispersing
 	# checking if there was already an option -K. That means we do not need to run dedispersion as all sub-integrations
 	# have been aligned already
-	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-K$", cmdline.opts.dspsr_extra_opts) or \ re.match("^.*\s+\-K\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+.*$", cmdline.opts.dspsr_extra_opts):
+	if re.match("^\-K$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-K$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-K\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-K\s+.*$", cmdline.opts.dspsr_extra_opts):
 		cmd="mv %s_%s.ar %s_%s.dd" % (psr, output_prefix, psr, output_prefix)
 		root.execute(cmd, workdir=curdir)
 	else:
@@ -172,8 +172,7 @@ def start_pdmp(root, ref, cmdline, obs, nsubs_eff, curdir, output_prefix):
 			binsline=os.popen(cmd).readlines()
 			if np.size(binsline) > 0:
 				best_nbins=int(binsline[0][:-1])
-				cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
-					(nsubs_eff, min(128, best_nbins), psr, output_prefix, psr, output_prefix, output_stem)
+				cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % (nsubs_eff, min(128, best_nbins), psr, output_prefix, psr, output_prefix, output_stem)
 				pdmp_popen = root.start_and_go(cmd, workdir=curdir)
 				pdmp_popens.append(pdmp_popen)
 		except Exception: pass
