@@ -315,7 +315,7 @@ class PipeUnit:
 			# by default -L is used, but if -s is given in the dspsr_extra_opts, then we should get rid of -L
 			self.dspsr_folding_options="-L %d" % (cmdline.opts.tsubint)
 			if re.match("^\-s$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-s$", cmdline.opts.dspsr_extra_opts) or re.match("^.*\s+\-s\s+.*$", cmdline.opts.dspsr_extra_opts) or re.match("^\-s\s+.*$", cmdline.opts.dspsr_extra_opts):
-			self.dspsr_folding_options=""
+				self.dspsr_folding_options=""
 
 	# function to set outdir and curdir directories
 	def set_outdir(self, obs, cep2, cmdline):
