@@ -599,14 +599,14 @@ UNITS line will be removed from the parfile!" % (parfile,))
 				self.execute(cmd, self.log, is_os=True)
 				cmd="rsync -a %s %s" % (parf, self.outdir)
 				self.execute(cmd)
-				# removing pulsars from folding if their parfile is bad (e.g. no PEPOCH)
-				if len(toremove_psrs) > 0:
-					indices_to_remove=set()
-					for psr in np.unique(toremove_psrs):
-						for ii in xrange(len(self.psrs)):
-							if psr == self.psrs[ii]: indices_to_remove.add(ii) 
-				indices_to_keep=sorted(set(np.arange(len(self.psrs)))-indices_to_remove)
-				self.psrs = self.psrs[indices_to_keep]
+		# removing pulsars from folding if their parfile is bad (e.g. no PEPOCH)
+		if len(toremove_psrs) > 0:
+			indices_to_remove=set()
+			for psr in np.unique(toremove_psrs):
+				for ii in xrange(len(self.psrs)):
+					if psr == self.psrs[ii]: indices_to_remove.add(ii) 
+			indices_to_keep=sorted(set(np.arange(len(self.psrs)))-indices_to_remove)
+			self.psrs = self.psrs[indices_to_keep]
 		# return tmpdir
 		return tmpdir
 
