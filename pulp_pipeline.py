@@ -1417,16 +1417,16 @@ class Pipeline:
 						# adding bestprof files that were only made with _nomask_ to the list of good bestprofs
 						good_bestprofs.extend(only_nomask_bestprofs)
 					
-						for bp in good_bestprofs:
-							psr=bp.split("/")[-1].split("_")[0]
-							thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+				for bp in good_bestprofs:
+					psr=bp.split("/")[-1].split("_")[0]
+					thumbfile=bp.split(sumdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
 					# we need it for combined.pdf
 					bigfile=thumbfile.split(".th.png")[0] + ".png"
 
-						# getting current number for SAP and TA beam (or station name for FE)
+					# getting current number for SAP and TA beam (or station name for FE)
 					try: # we need this try block in case User manually creates sub-directories with some test bestprof files there
-					     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
-					     # on a wrong-formed string applying int()
+						# which will also be found by rglob function. So, we need to exclude them by catching an Exception
+						# on a wrong-formed string applying int()
 						cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
 					except: continue
 					curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
@@ -1435,19 +1435,20 @@ class Pipeline:
 					stokes=""
 					if is_iquv:
 						stokes = bigfile.split("%s_S" % (curprocdir))[-1].split("_")[0]
-						# calculating the S/N (profile significance) from the bestprof file
-						snr=0.0
-						try:
-							locdir="/".join(bp.split("/")[0:-1])
-							import tempfile
-							snrtmpdir=tempfile.mkdtemp()
-							snrlog="%s/snr-presto.log" % (snrtmpdir)
-							if not os.path.exists("%s/%s" % (locdir, snrlog)):
-								cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, locdir, snrlog)
-								self.execute(cmd, workdir=locdir, is_os=True)
-								tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
-								snr = float(tmp[0])
-						except:
+						
+					# calculating the S/N (profile significance) from the bestprof file
+					snr=0.0
+					try:
+						locdir="/".join(bp.split("/")[0:-1])
+						import tempfile
+						snrtmpdir=tempfile.mkdtemp()
+						snrlog="%s/snr-presto.log" % (snrtmpdir)
+						if not os.path.exists("%s/%s" % (locdir, snrlog)):
+							cmd="snr.py --presto --snrmethod=Off --auto-off --plot --saveonly %s | tee %s/%s" % (bp, locdir, snrlog)
+							self.execute(cmd, workdir=locdir, is_os=True)
+							tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
+							snr = float(tmp[0])
+					except:
 							self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
 
 					# getting the part number if there are many splits
@@ -1458,9 +1459,9 @@ class Pipeline:
 					# check if key exists in a rfis dictionary
 					if "%d_%s" % (cursapid, curprocdir) in rfis:
 						rfifrac = rfis["%d_%s" % (cursapid, curprocdir)]
-					else: 
-						rfifrac = ""
-						chif.write("file=%s obs=%s_SAP%d_%s%s%s_%s S/N=%g%s\n" % (thumbfile, data_code, \
+					else: rfifrac = ""
+						
+					chif.write("file=%s obs=%s_SAP%d_%s%s%s_%s S/N=%g%s\n" % (thumbfile, data_code, \
 						cursapid, curprocdir, stokes != "" and "_S%s" % (stokes) or "", curpart != "" and "_PART%s" % (curpart) or "", psr, snr, rfifrac != "" and " RFI=%s" % (rfifrac) or ""))
 					if os.path.exists("%s/%s" % (sumdir, thumbfile)):
 						montage_cmd += "-label '%s SAP%d %s%s%s\n%s\nS/N = %g' %s " % (data_code, \
@@ -1470,11 +1471,11 @@ class Pipeline:
 						montage_cmd_pdf += "-label '%s SAP%d %s%s%s\n%s\nS/N = %g' %s " % (data_code, \
 								cursapid, curprocdir, stokes != "" and "\nSTOKES_%s" % ("IQUV"[int(stokes)]) or "", \
 								curpart != "" and "%sPART%s" % (stokes != "" and " " or "\n", curpart) or "", psr, snr, bigfile)
-						chif.close()
-					cmd="cp %s/%s %s" % (locdir, snrlog, locdir)
-					self.execute(cmd, workdir=locdir)
-					cmd="rm -rf %s" % (snrtmpdir)
-					os.system(cmd)
+			chif.close()
+			cmd="cp %s/%s %s" % (locdir, snrlog, locdir)
+			self.execute(cmd, workdir=locdir)
+			cmd="rm -rf %s" % (snrtmpdir)
+			os.system(cmd)
 
 
 			# creating combined plots
