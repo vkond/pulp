@@ -1446,6 +1446,7 @@ class Pipeline:
 							self.execute(cmd, workdir=locdir, is_os=True)
 							tmp = np.genfromtxt("%s/%s" % (locdir, snrlog), skip_header=13, skip_footer=2, usecols=(4,4), dtype=float, unpack=True)[0]
 							snr = float(tmp[0])
+							self.log.warning("******** DEBUG ********* bp=%s  locdir=%s snr=%g" % (bp, locdir, snr))
 					except:
 							self.log.warning("Warning: can't read file %s or calculate S/N of the profile" % (bp))
 
