@@ -408,7 +408,7 @@ class PipeUnit:
 						if obs.stokesIS == "IQUV": 
 							fbindex += 4 * cmdline.opts.nsplitsIS
 						else: fbindex += cmdline.opts.nsplitsIS
-				return fbindex
+		return fbindex
 
 	# function to initialize feedback unit (should be called after self.outdir is set)
 	def feedback_init(self, obs, cep2, cmdline):
